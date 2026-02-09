@@ -1,793 +1,452 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Camera, 
-  Trash2, 
-  Plus, 
-  FileText, 
-  CheckCircle, 
-  AlertTriangle, 
-  Save, 
-  Printer, 
-  Bold, 
-  Italic, 
-  List, 
-  AlignLeft, 
-  X, 
-  Grid, 
-  FileDown, 
-  Paperclip, 
-  Info, 
-  Check, 
-  Loader 
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Auditoria Interna - Diamante Lingerie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
-const Toast = ({ message, type, onClose }) => {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
+        body { 
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
 
-  const bgClass = type === 'success' ? 'bg-green-700' : type === 'error' ? 'bg-red-800' : 'bg-slate-800';
+        * { border-radius: 0 !important; }
 
-  return (
-    <div className={`fixed top-4 right-4 ${bgClass} text-white px-6 py-3 rounded-sm shadow-2xl z-50 flex items-center gap-3 animate-fade-in-down no-print border border-white/20`}>
-      {type === 'success' ? <Check size={18} /> : type === 'error' ? <AlertTriangle size={18} /> : <Info size={18} />}
-      <span className="font-semibold text-sm">{message}</span>
-      <button onClick={onClose} className="ml-2 opacity-80 hover:opacity-100"><X size={14} /></button>
-    </div>
-  );
-};
+        /* Regras de Impressão e PDF */
+        .avoid-break { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important;
+        }
 
-const GlobalStyles = () => (
-  <style>{`
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      background-color: #f1f5f9;
-      color: #1e293b;
-    }
+        .pdf-page-break {
+            display: none;
+        }
 
-    * { box-sizing: border-box; border-radius: 0 !important; } 
-    
-    .avoid-break { 
-      page-break-inside: avoid !important; 
-      break-inside: avoid !important;
-    }
+        .printable-area {
+            max-width: 1000px;
+            margin: 1.5rem auto;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
 
-    /* Regra de quebra de página forçada para o PDF */
-    .pdf-page-break {
-      display: none;
-    }
+        .card-top-main {
+            background-color: #b91c1c !important;
+            color: #ffffff !important;
+            border-bottom: 2px solid #000;
+        }
 
-    .printable-area {
-      max-width: 1000px;
-      margin: 1.5rem auto;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-    }
+        .header-table-grid {
+            border: 1.5px solid #000000 !important;
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-    .content-padding {
-      padding: 1.5rem; 
-    }
+        .cell-label {
+            background-color: #7f1d1d !important; 
+            color: #ffffff !important;
+            font-weight: 700;
+            font-size: 8.5px;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border: 1px solid #000;
+        }
 
-    .dynamic-title-container {
-      padding: 1rem;
-      border-bottom: 2px solid #000;
-      background-color: #fff;
-    }
+        .cell-value {
+            background-color: #fff1f2 !important; 
+            color: #000000 !important;
+            font-weight: 700;
+            font-size: 10px;
+            padding: 6px 10px;
+            border: 1px solid #000;
+        }
 
-    .card-top-main {
-      background-color: #b91c1c !important;
-      color: #ffffff !important;
-      border-bottom: 2px solid #000;
-      padding: 0.75rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        .section-header {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #7f1d1d;
+            border-bottom: 2px solid #7f1d1d;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+        }
 
-    .header-table-grid {
-      border: 1.5px solid #000000 !important;
-      width: 100%;
-      table-layout: fixed;
-      border-collapse: collapse;
-    }
+        @media print {
+            @page { margin: 0; size: A4 portrait; }
+            body { background: white !important; padding: 0 !important; }
+            .printable-area { margin: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; }
+            .no-print { display: none !important; }
+            .pdf-page-break { display: block; page-break-after: always; height: 0; }
+            .content-padding { padding: 15mm !important; }
+        }
 
-    .header-row {
-      border-bottom: 1px solid #000000 !important;
-      display: flex;
-    }
-    .header-row:last-child {
-      border-bottom: none !important;
-    }
+        input, textarea {
+            background: transparent;
+            width: 100%;
+            outline: none;
+            font-weight: 700;
+        }
 
-    .cell-label {
-      background-color: #7f1d1d !important; 
-      color: #ffffff !important;
-      font-weight: 700;
-      font-size: 8.5px;
-      text-transform: uppercase;
-      padding: 6px 10px;
-      border-right: 1px solid #000;
-      display: flex;
-      align-items: center;
-      min-width: 130px;
-      letter-spacing: 0.05em;
-    }
+        textarea { resize: none; }
+    </style>
+</head>
+<body>
 
-    .cell-value {
-      background-color: #fff1f2 !important; 
-      color: #000000 !important;
-      font-weight: 700;
-      font-size: 10px;
-      padding: 6px 10px;
-      border-right: 1px solid #000;
-      flex: 1;
-      display: flex;
-      align-items: center;
-      min-height: 28px;
-    }
-    .cell-value:last-child {
-      border-right: none;
-    }
-
-    .pdf-text-content {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 10px;
-      color: #000;
-      font-weight: 700;
-      display: block;
-    }
-
-    .section-header {
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-      color: #7f1d1d;
-      border-bottom: 2px solid #7f1d1d;
-      padding-bottom: 4px;
-      margin-bottom: 12px;
-      letter-spacing: 0.1em;
-    }
-
-    @media print {
-      @page { 
-        margin: 0;
-        size: A4 portrait; 
-      }
-      body { background: white !important; }
-      .printable-area { 
-        border: none !important;
-        margin: 0 !important; 
-        width: 100% !important;
-        max-width: none !important;
-      }
-      .no-print { display: none !important; }
-      .card-top-main { -webkit-print-color-adjust: exact; background-color: #b91c1c !important; }
-      .cell-label { -webkit-print-color-adjust: exact; background-color: #7f1d1d !important; border: 1px solid #000 !important; }
-      .cell-value { -webkit-print-color-adjust: exact; background-color: #fff1f2 !important; border: 1px solid #000 !important; }
-      
-      .pdf-page-break {
-        display: block;
-        page-break-after: always;
-        height: 0;
-        overflow: hidden;
-      }
-
-      .content-padding {
-        padding: 15mm !important;
-      }
-    }
-  `}</style>
-);
-
-const PrintableInput = ({ isPdfMode, value, onChange, placeholder, align = "left", prefix }) => {
-  if (isPdfMode) {
-    return (
-      <div className={`pdf-text-content ${align === 'center' ? 'text-center' : 'text-left'}`}>
-        {prefix ? `${prefix}${value}` : (value || " ")}
-      </div>
-    );
-  }
-  return (
-    <div className="flex items-center w-full">
-      {prefix && <span className="mr-1 text-[10px] font-black text-slate-500">{prefix}</span>}
-      <input 
-        className={`w-full bg-transparent outline-none focus:bg-white transition-all ${align === 'center' ? 'text-center' : 'text-left'}`}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-};
-
-const PrintableTextArea = ({ isPdfMode, value, onChange, placeholder, rows = 3 }) => {
-  if (isPdfMode) {
-    return (
-      <div className="pdf-text-content text-justify leading-relaxed">
-        {value ? value : <span className="text-gray-400 italic font-normal">-</span>}
-      </div>
-    );
-  }
-  return (
-    <textarea 
-      className="w-full bg-transparent outline-none focus:bg-white transition-all resize-none p-1"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      rows={rows}
-    />
-  );
-};
-
-const ImageUploader = ({ isPdfMode, label, image, onUpload, onRemove }) => {
-  const fileInputRef = useRef(null);
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => onUpload(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="mt-2 mb-2 avoid-break w-full">
-      <div className="flex items-center justify-between mb-1 border-b border-gray-100 pb-1">
-        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-1">
-          <Camera size={11} className="text-red-700" /> {label || "Anexo Fotográfico"}
-        </span>
-      </div>
-      {!image ? (!isPdfMode && (
-        <div onClick={() => fileInputRef.current.click()} className="no-print border border-dashed border-gray-300 p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-red-50/50 transition-colors h-14 w-full">
-          <Camera className="text-gray-400 mb-1" size={16} />
-          <span className="text-[8px] text-gray-500 uppercase font-bold">Vincular Imagem</span>
-          <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
-        </div>
-      )) : (
-        <div className="relative group border border-gray-200 bg-white w-full text-center">
-          <img src={image} alt="Evidência" className="h-auto max-h-[250px] object-contain mx-auto" style={{ display: 'block' }} />
-          {!isPdfMode && (
-            <div className="absolute top-2 right-2 no-print">
-              <button onClick={onRemove} className="bg-red-700 text-white p-1.5 shadow-lg hover:bg-red-800 transition-colors"><Trash2 size={12} /></button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const RiskMatrix = ({ isPdfMode, onSelect, selectedValue }) => {
-  const columns = ['Mínimo', 'Leve', 'Moderado', 'Grave', 'Gravíssimo'];
-  const rowLabels = [
-    { l: '(FC) 1', s: 'M. Alto' },
-    { l: '(FC) 0.8', s: 'Alto' },
-    { l: '(FC) 0.6', s: 'Médio' },
-    { l: '(FC) 0.4', s: 'Baixo' },
-    { l: '(FC) 0.2', s: 'M. Baixo' }
-  ];
-
-  const cells = [
-    ['bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600', 'bg-red-700'],
-    ['bg-emerald-600', 'bg-yellow-400', 'bg-yellow-400', 'bg-red-600', 'bg-red-700'],
-    ['bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600'],
-    ['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600'],
-    ['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400']
-  ];
-
-  const cellValues = [
-    ['10%', '30%', '50%', '75%', '95%'],
-    ['8%', '24%', '40%', '60%', '76%'],
-    ['6%', '18%', '30%', '45%', '57%'],
-    ['4%', '12%', '20%', '30%', '38%'],
-    ['2%', '6%', '10%', '15%', '19%']
-  ];
-
-  const riskLevels = [
-    ['MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO', 'EXTREMO'],
-    ['MODERADO', 'ELEVADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],
-    ['BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],
-    ['BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO'],
-    ['BAIXO', 'BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO']
-  ];
-
-  return (
-    <div className="w-full bg-white border border-black p-4 avoid-break">
-      <div className="section-header flex items-center gap-2">
-        <Grid size={16} /> 1. MATRIZ DE RISCO DA AUDITORIA
-      </div>
-      <div className="w-full overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="w-20 border border-gray-300"></th>
-              {columns.map((c, i) => (
-                <th key={i} className="border border-gray-300 bg-gray-50 p-2 text-[8px] font-black uppercase text-gray-700">
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rowLabels.map((rl, rIdx) => (
-              <tr key={rIdx}>
-                <td className="border border-gray-300 bg-gray-50 p-1 text-center">
-                  <div className="text-[9px] font-bold text-gray-800">{rl.l}</div>
-                  <div className="text-[7px] text-gray-500 uppercase">{rl.s}</div>
-                </td>
-                {cells[rIdx].map((color, cIdx) => {
-                  const val = cellValues[rIdx][cIdx];
-                  const level = riskLevels[rIdx][cIdx];
-                  const isSelected = selectedValue?.val === val && selectedValue?.r === rIdx && selectedValue?.c === cIdx;
-                  return (
-                    <td key={cIdx} className="border border-gray-300 p-0.5">
-                      <button 
-                        onClick={() => !isPdfMode && onSelect({ val, level, color, r: rIdx, c: cIdx, impact: columns[cIdx], prob: rl.s })}
-                        className={`w-full flex flex-col justify-center items-center h-10 transition-all ${color} ${isSelected ? 'ring-2 ring-black z-10 scale-105 shadow-xl' : 'opacity-90 hover:opacity-100'}`}
-                      >
-                        <span className={`text-[7px] font-black ${color.includes('yellow') ? 'text-gray-800' : 'text-white'}`}>{level}</span>
-                        <span className={`text-[10px] font-black ${color.includes('yellow') ? 'text-gray-900' : 'text-white'}`}>{val}</span>
-                      </button>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-export default function App() {
-  const [toast, setToast] = useState(null);
-  const [isPdfReady, setIsPdfReady] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isPdfMode, setIsPdfMode] = useState(false); 
-  
-  const [selectedRisk, setSelectedRisk] = useState({ 
-    val: '95%', level: 'Risco Extremo', color: 'bg-red-700', r: 0, c: 4, impact: 'Gravíssimo', prob: 'M. Alto' 
-  });
-
-  const [header, setHeader] = useState({ 
-    area: 'Comercial', 
-    rel: '289', 
-    obj: 'Auditar a conformidade fiscal e operacional das transações com descontos superiores a 30% realizadas em 2025.', 
-    normas: 'Pops e Politicas Internas', 
-    agreg: '', 
-    notific: '1', 
-    ncs: '1', 
-    gestor: 'Aline Roberta', 
-    diretoria: 'Daniele Sobral', 
-    md: 'Não' 
-  });
-
-  const [preliminar, setPreliminar] = useState(`Revisão das Políticas de Desconto\nAvaliar, em nível estratégico, a adequação dos limites máximos de desconto, critérios de exceção e níveis de alçada atualmente vigentes, considerando margem, competitividade e risco.\n\nDefinição de Diretrizes e Alçadas\nDeliberar sobre a necessidade de aprovação obrigatória da Diretoria ou de instância superior para concessões acima de determinado percentual ou valor absoluto.\n\nFortalecimento dos Controles Internos\nDeterminar a implementação ou o reforço de controles sistêmicos que impeçam a aplicação de descontos acima dos limites definidos sem autorização prévia.`);
-  const [preliminarImages, setPreliminarImages] = useState([]);
-  
-  const [findings, setFindings] = useState([{ 
-    id: 1, 
-    proc: 'Auditoria Interna de Descontos em Vendas', 
-    evid: ['Análise do Ponto – Volume de Descontos por Loja\n\nA análise dos dados extraídos evidencia a concentração relevante de valores de desconto em um grupo específico de lojas e produtos.'], 
-    nc: ['Desvio na política de descontos manuais sem registro de justificativa técnica no sistema de vendas.'], 
-    acao: 'Implementar trava sistêmica para descontos superiores a 30% no PDV.', 
-    resp: 'Gerência de TI / Comercial', 
-    imgs: [] 
-  }]);
-
-  const [finalOpinions, setFinalOpinions] = useState(['Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.']);
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-    script.onload = () => setIsPdfReady(true);
-    document.body.appendChild(script);
-  }, []);
-
-  const reportMainTitle = findings[0]?.proc || "LAUDO TÉCNICO DE AUDITORIA";
-
-  const handleGeneratePDF = () => {
-    if (!isPdfReady) return;
-    setIsGenerating(true);
-    setIsPdfMode(true);
-    
-    setTimeout(() => {
-      const element = document.getElementById('printable-dashboard');
-      const opt = {
-        margin: 0,
-        filename: `Laudo_Auditoria_${header.rel || 'Draft'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-      };
-
-      window.html2pdf().set(opt).from(element).save().then(() => {
-        setIsGenerating(false);
-        setIsPdfMode(false);
-        setToast({ message: "PDF assinado e gerado com sucesso!", type: "success" });
-      }).catch((err) => {
-        console.error(err);
-        setIsGenerating(false);
-        setIsPdfMode(false);
-        setToast({ message: "Falha na geração do PDF.", type: "error" });
-      });
-    }, 600);
-  };
-
-  const updateFindingField = (id, field, value) => {
-    setFindings(prev => prev.map(f => f.id === id ? { ...f, [field]: value } : f));
-  };
-
-  const addListItem = (findingId, field) => {
-    setFindings(prev => prev.map(f => f.id === findingId ? { ...f, [field]: [...f[field], ''] } : f));
-  };
-
-  const updateListItem = (findingId, field, index, value) => {
-    setFindings(prev => prev.map(f => {
-      if (f.id === findingId) {
-        const newList = [...f[field]];
-        newList[index] = value;
-        return { ...f, [field]: newList };
-      }
-      return f;
-    }));
-  };
-
-  const removeListItem = (findingId, field, index) => {
-    setFindings(prev => prev.map(f => {
-      if (f.id === findingId && f[field].length > 1) {
-        const newList = f[field].filter((_, i) => i !== index);
-        return { ...f, [field]: newList };
-      }
-      return f;
-    }));
-  };
-
-  const addPrelimImage = (img) => setPreliminarImages(p => [...p, img]);
-  const removePrelimImage = (index) => setPreliminarImages(p => p.filter((_, i) => i !== index));
-
-  const addFindingImage = (id, img) => {
-    setFindings(prev => prev.map(f => f.id === id ? { ...f, imgs: [...f.imgs, img] } : f));
-  };
-  const removeFindingImage = (id, index) => {
-    setFindings(prev => prev.map(f => f.id === id ? { ...f, imgs: f.imgs.filter((_, i) => i !== index) } : f));
-  };
-
-  const addFinalOpinion = () => setFinalOpinions(p => [...p, '']);
-  const updateFinalOpinion = (idx, val) => {
-    const next = [...finalOpinions];
-    next[idx] = val;
-    setFinalOpinions(next);
-  };
-  const removeFinalOpinion = (idx) => {
-    if (finalOpinions.length > 1) setFinalOpinions(p => p.filter((_, i) => i !== idx));
-  };
-
-  return (
-    <div className="min-h-screen pb-20">
-      <GlobalStyles />
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      <div id="printable-dashboard" className={`printable-area ${isPdfMode ? 'pdf-mode-active' : ''}`}>
+    <div id="printable-dashboard" class="printable-area">
         
-        {/* --- PÁGINA 1: CABEÇALHO E MATRIZ --- */}
-        <div className="content-padding">
-          <div className="dynamic-title-container text-center">
-             <h2 className="text-xl font-black uppercase text-red-800 tracking-wider">
-               {reportMainTitle}
-             </h2>
-          </div>
-
-          <div className="card-top-main">
-            <div className="flex items-center gap-3">
-              <div className="bg-white p-1.5 shadow-sm">
-                  <FileText size={20} className="text-red-700" />
-              </div>
-              <div>
-                <h1 className="text-base font-black uppercase leading-none tracking-tight">Compliance & Auditoria Interna</h1>
-                <p className="text-[8px] font-bold opacity-90 uppercase tracking-[0.2em] mt-0.5">Laudo de Auditoria Interna</p>
-                <p className="text-[8px] font-medium opacity-80 lowercase mt-0.5">auditoriainterna@diamantesl.com</p>
-              </div>
+        <!-- PÁGINA 1: IDENTIFICAÇÃO E RISCO -->
+        <div class="content-padding p-6">
+            <div class="text-center mb-4">
+                <h2 id="display-main-title" class="text-xl font-black uppercase text-red-800 tracking-wider">LAUDO TÉCNICO DE AUDITORIA</h2>
             </div>
-            <div className="flex flex-col items-end gap-0.5">
-              <div className="bg-red-950 px-2 py-0.5 text-[9px] font-black border border-black uppercase">FR-AUD-001</div>
-              <div className="text-[8px] font-bold uppercase opacity-80">Ref: 09/02/2026</div>
-              {!isPdfMode && (
-                <button 
-                  onClick={handleGeneratePDF}
-                  className="mt-1 bg-white text-red-800 px-3 py-1 font-black text-[9px] uppercase shadow hover:bg-red-50 flex items-center gap-1.5 transition-all"
-                >
-                  {isGenerating ? <Loader size={12} className="animate-spin" /> : <FileDown size={12} />} Gerar PDF Oficial
+
+            <div class="card-top-main flex justify-between items-center p-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white p-2">
+                        <i data-lucide="file-text" class="text-red-700 w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base font-black uppercase leading-none">Compliance & Auditoria Interna</h1>
+                        <p class="text-[8px] font-bold uppercase mt-1">Laudo de Auditoria Interna | auditoriainterna@diamantesl.com</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="bg-red-950 px-2 py-0.5 text-[9px] font-black border border-black uppercase inline-block">FR-AUD-001</div>
+                    <p class="text-[8px] font-bold uppercase mt-1">Ref: 09/02/2026</p>
+                    <button onclick="generatePDF()" class="no-print mt-2 bg-white text-red-800 px-3 py-1 font-black text-[9px] uppercase shadow hover:bg-red-50 flex items-center gap-1">
+                        <i data-lucide="file-down" class="w-3 h-3"></i> Gerar PDF Oficial
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela de Dados -->
+            <div class="mt-6">
+                <table class="header-table-grid w-full">
+                    <tr>
+                        <td class="cell-label w-32">Área Auditada:</td>
+                        <td class="cell-value" colspan="3"><input type="text" value="Comercial" id="input-area"></td>
+                        <td class="cell-label w-24">Laudo Nº:</td>
+                        <td class="cell-value"><input type="text" value="289" id="input-rel" class="text-center"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Objetivo / Escopo:</td>
+                        <td class="cell-value" colspan="5"><input type="text" value="Auditar a conformidade fiscal e operacional das transações com descontos superiores a 30% realizadas em 2025." id="input-obj"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Norma(s) de Ref:</td>
+                        <td class="cell-value" colspan="3"><input type="text" value="Pops e Politicas Internas" id="input-normas"></td>
+                        <td class="cell-label">MD Recomendada:</td>
+                        <td class="cell-value">
+                            <select id="input-md" class="w-full bg-transparent font-bold text-[10px]">
+                                <option value="Não">Não</option>
+                                <option value="Sim">Sim</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Valor Agregado:</td>
+                        <td class="cell-value" colspan="1">
+                            <div class="flex"><span>R$&nbsp;</span><input type="text" id="input-agreg" value=""></div>
+                        </td>
+                        <td class="cell-label w-24">Notific.:</td>
+                        <td class="cell-value"><input type="text" value="1" id="input-notific" class="text-center"></td>
+                        <td class="cell-label w-16">NC's:</td>
+                        <td class="cell-value"><input type="text" value="1" id="input-ncs" class="text-center"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Gestor / Diretor:</td>
+                        <td class="cell-value" colspan="5"><input type="text" value="Aline Roberta / Daniele Sobral" id="input-gestor"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Matriz de Risco -->
+            <div class="mt-6 avoid-break border border-black p-4">
+                <div class="section-header flex items-center gap-2">
+                    <i data-lucide="grid" class="w-4 h-4"></i> 1. MATRIZ DE RISCO DA AUDITORIA
+                </div>
+                <div id="risk-matrix-container"></div>
+
+                <div class="mt-4 bg-slate-50 border border-black p-4 text-center">
+                    <h4 class="text-[9px] font-black uppercase text-slate-400 mb-2">Resultado da Análise de Risco</h4>
+                    <div id="risk-result">
+                        <p class="text-[10px] font-bold text-slate-700 mb-1">IMPACTO: GRAVÍSSIMO | PROBABILIDADE: (M. ALTO)</p>
+                        <p class="text-[13px] font-black uppercase text-red-900">VALOR: 95% — RISCO EXTREMO</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pdf-page-break"></div>
+
+        <!-- PÁGINA 2: CONTEXTO E APONTAMENTOS -->
+        <div class="content-padding p-6">
+            <section class="avoid-break mb-8">
+                <h2 class="section-header flex items-center gap-2">
+                    <i data-lucide="info" class="w-4 h-4"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO
+                </h2>
+                <div class="border border-black p-3 bg-white mb-2">
+                    <textarea id="input-preliminar" rows="6" placeholder="Cenário inicial...">Revisão das Políticas de Desconto
+Avaliar, em nível estratégico, a adequação dos limites máximos de desconto, critérios de exceção e níveis de alçada atualmente vigentes, considerando margem, competitividade e risco.
+
+Definição de Diretrizes e Alçadas
+Deliberar sobre a necessidade de aprovação obrigatória da Diretoria ou de instância superior para concessões acima de determinado percentual ou valor absoluto.
+
+Fortalecimento dos Controles Internos
+Determinar a implementação ou o reforço de controles sistêmicos que impeçam a aplicação de descontos acima dos limites definidos sem autorização prévia.</textarea>
+                </div>
+                <div id="preliminar-images" class="grid grid-cols-2 gap-2"></div>
+                <button onclick="addImage('preliminar')" class="no-print mt-2 text-[10px] font-bold text-red-700 flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3 h-3"></i> ADICIONAR FOTO AO CONTEXTO
                 </button>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <div className="header-table-grid mb-6">
-              <div className="header-row">
-                <div className="cell-label">Área Auditada:</div>
-                <div className="cell-value" style={{ flex: 3 }}>
-                  <PrintableInput isPdfMode={isPdfMode} value={header.area} onChange={e => setHeader({...header, area: e.target.value})} />
-                </div>
-                <div className="cell-label" style={{ minWidth: '90px' }}>Laudo Nº:</div>
-                <div className="cell-value" style={{ maxWidth: '100px' }}>
-                  <PrintableInput isPdfMode={isPdfMode} align="center" value={header.rel} onChange={e => setHeader({...header, rel: e.target.value})} />
-                </div>
-              </div>
-
-              <div className="header-row">
-                <div className="cell-label">Objetivo / Escopo:</div>
-                <div className="cell-value">
-                  <PrintableInput isPdfMode={isPdfMode} value={header.obj} onChange={e => setHeader({...header, obj: e.target.value})} />
-                </div>
-              </div>
-
-              <div className="header-row">
-                <div className="cell-label">Norma(s) de Referência:</div>
-                <div className="cell-value">
-                  <PrintableInput isPdfMode={isPdfMode} value={header.normas} onChange={e => setHeader({...header, normas: e.target.value})} />
-                </div>
-                <div className="cell-label" style={{ minWidth: '120px' }}>MD Recomendada:</div>
-                <div className="cell-value" style={{ maxWidth: '80px' }}>
-                  {!isPdfMode ? (
-                    <select className="w-full bg-transparent outline-none font-bold text-[10px]" value={header.md} onChange={e => setHeader({...header, md: e.target.value})}>
-                      <option value="Não">Não</option>
-                      <option value="Sim">Sim</option>
-                    </select>
-                  ) : (
-                    <div className="pdf-text-content text-center">{header.md}</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="header-row">
-                <div className="cell-label">Valor Agregado:</div>
-                <div className="cell-value">
-                  <PrintableInput isPdfMode={isPdfMode} prefix="R$ " value={header.agreg} onChange={e => setHeader({...header, agreg: e.target.value})} />
-                </div>
-                <div className="cell-label" style={{ minWidth: '100px' }}>Notificações:</div>
-                <div className="cell-value" style={{ maxWidth: '70px' }}>
-                  <PrintableInput isPdfMode={isPdfMode} align="center" value={header.notific} onChange={e => setHeader({...header, notific: e.target.value})} />
-                </div>
-                <div className="cell-label" style={{ minWidth: '60px' }}>NC's:</div>
-                <div className="cell-value" style={{ maxWidth: '70px' }}>
-                  <PrintableInput isPdfMode={isPdfMode} align="center" value={header.ncs} onChange={e => setHeader({...header, ncs: e.target.value})} />
-                </div>
-              </div>
-
-              <div className="header-row">
-                <div className="cell-label">Gestor do Processo:</div>
-                <div className="cell-value">
-                  <PrintableInput isPdfMode={isPdfMode} value={header.gestor} onChange={e => setHeader({...header, gestor: e.target.value})} />
-                </div>
-                <div className="cell-label" style={{ minWidth: '100px' }}>Diretoria:</div>
-                <div className="cell-value">
-                  <PrintableInput isPdfMode={isPdfMode} value={header.diretoria} onChange={e => setHeader({...header, diretoria: e.target.value})} />
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <RiskMatrix isPdfMode={isPdfMode} selectedValue={selectedRisk} onSelect={setSelectedRisk} />
-            </div>
-
-            <div className="bg-slate-50 border border-black p-4 text-center">
-                <h4 className="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Resultado da Análise de Risco</h4>
-                {selectedRisk ? (
-                    <div className="animate-fade-in">
-                        <p className="text-[10px] font-bold text-slate-700 mb-1">
-                            IMPACTO: <span className="text-black uppercase">Impacto {selectedRisk.impact}</span> | 
-                            PROBABILIDADE: <span className="text-black uppercase">({selectedRisk.prob})</span>
-                        </p>
-                        <p className="text-[13px] font-black uppercase text-red-900">
-                            VALOR: {selectedRisk.val} — {selectedRisk.level}
-                        </p>
-                        <div className="mt-3 inline-flex items-center gap-2 bg-slate-900 text-white px-5 py-1.5 text-[9px] font-black uppercase tracking-widest no-print">
-                            <CheckCircle size={14} className="text-green-400" /> Confirmo o Risco Identificado
-                        </div>
-                    </div>
-                ) : (
-                    <p className="text-[10px] text-slate-400 italic font-bold">Nenhum parâmetro de risco selecionado.</p>
-                )}
-            </div>
-          </div>
-        </div>
-
-        {/* --- QUEBRA DE PÁGINA 1 PARA 2 --- */}
-        <div className="pdf-page-break"></div>
-
-        {/* --- PÁGINA 2: DESCRIÇÃO PRELIMINAR E APONTAMENTOS --- */}
-        <div className="content-padding">
-          <div className="flex flex-col gap-8">
-            <section className="avoid-break block w-full">
-              <h2 className="section-header flex items-center gap-2">
-                <Info size={14} /> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO
-              </h2>
-              <div className="border border-black p-3 bg-white mb-2">
-                <PrintableTextArea isPdfMode={isPdfMode} value={preliminar} onChange={e => setPreliminar(e.target.value)} rows={6} placeholder="Descreva o cenário inicial..." />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {preliminarImages.map((img, idx) => (
-                  <div key={idx}>
-                    <ImageUploader 
-                      isPdfMode={isPdfMode} 
-                      label={`ANEXO 01.${idx + 1}: EVIDÊNCIA DO CONTEXTO`} 
-                      image={img} 
-                      onRemove={() => removePrelimImage(idx)} 
-                    />
-                  </div>
-                ))}
-                {!isPdfMode && (
-                  <div className="mt-2">
-                    <ImageUploader 
-                        isPdfMode={isPdfMode} 
-                        label="ADICIONAR NOVO ANEXO AO CONTEXTO" 
-                        onUpload={addPrelimImage} 
-                    />
-                  </div>
-                )}
-              </div>
             </section>
 
-            <section className="block w-full">
-              <div className="section-header flex items-center gap-2">
-                <AlertTriangle size={14} /> 3. APONTAMENTOS E NÃO CONFORMIDADES
-              </div>
-
-              <div className="flex flex-col gap-6">
-                {findings.map((f, i) => (
-                  <div key={f.id} className="border border-black bg-white overflow-hidden avoid-break">
-                    <div className="bg-slate-900 p-2 border-b border-black flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase text-white tracking-widest">Detalhamento Técnico do Apontamento</span>
-                    </div>
-                    <div className="p-4 flex flex-col gap-4">
-                      <div className="w-full">
-                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 block">Processo Auditado / Objeto do Exame</label>
-                        <div className="border border-black p-2 bg-slate-50">
-                            <PrintableInput isPdfMode={isPdfMode} value={f.proc} onChange={e => updateFindingField(f.id, 'proc', e.target.value)} placeholder="Especifique o item auditado..." />
-                        </div>
-                      </div>
-                      
-                      <div className="border border-black p-3 bg-white avoid-break">
-                        <div className="flex justify-between items-center mb-2 border-b border-gray-100 pb-1">
-                          <h4 className="text-[9px] font-black text-red-900 uppercase flex items-center gap-1"><Paperclip size={10}/> Fatos / Evidências Encontradas</h4>
-                          {!isPdfMode && <button onClick={() => addListItem(f.id, 'evid')} className="bg-red-700 text-white p-1 hover:bg-red-800 transition-colors"><Plus size={12} /></button>}
-                        </div>
-                        <div className="flex flex-col gap-3">
-                          {f.evid.map((text, idx) => (
-                            <div key={idx} className="relative group flex gap-2 items-start">
-                              <span className="text-[10px] font-black text-red-800 mt-1">[{idx+1}]</span>
-                              <div className="flex-1 border-b border-gray-200 pb-1">
-                                  <PrintableTextArea isPdfMode={isPdfMode} value={text} onChange={e => updateListItem(f.id, 'evid', idx, e.target.value)} rows={2} placeholder="Descreva o fato..." />
-                              </div>
-                              {!isPdfMode && f.evid.length > 1 && (
-                                <button onClick={() => removeListItem(f.id, 'evid', idx)} className="text-red-400 hover:text-red-700 mt-1"><Trash2 size={12}/></button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="border border-black p-3 bg-white avoid-break">
-                        <div className="flex justify-between items-center mb-2 border-b border-gray-100 pb-1">
-                          <h4 className="text-[9px] font-black text-red-900 uppercase flex items-center gap-1"><AlertTriangle size={10}/> Desvios / Não Conformidades (NC)</h4>
-                          {!isPdfMode && <button onClick={() => addListItem(f.id, 'nc')} className="bg-red-700 text-white p-1 hover:bg-red-800 transition-colors"><Plus size={12} /></button>}
-                        </div>
-                        <div className="flex flex-col gap-3">
-                          {f.nc.map((text, idx) => (
-                            <div key={idx} className="relative group flex gap-2 items-start">
-                              <span className="text-[10px] font-black text-red-800 mt-1">[{idx+1}]</span>
-                              <div className="flex-1 border-b border-gray-200 pb-1">
-                                  <PrintableTextArea isPdfMode={isPdfMode} value={text} onChange={e => updateListItem(f.id, 'nc', idx, e.target.value)} rows={2} placeholder="Descreva o desvio normativo..." />
-                              </div>
-                              {!isPdfMode && f.nc.length > 1 && (
-                                <button onClick={() => removeListItem(f.id, 'nc', idx)} className="text-red-400 hover:text-red-700 mt-1"><Trash2 size={12}/></button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
-                        {f.imgs.map((img, imgIdx) => (
-                          <div key={imgIdx} className="avoid-break">
-                            <ImageUploader 
-                              isPdfMode={isPdfMode} 
-                              label={`ANEXO 02.${i+1}.${imgIdx+1}: REGISTRO FOTOGRÁFICO`} 
-                              image={img} 
-                              onRemove={() => removeFindingImage(f.id, imgIdx)} 
-                            />
-                          </div>
-                        ))}
-                        {!isPdfMode && (
-                          <div className="mt-1">
-                            <ImageUploader 
-                              isPdfMode={isPdfMode} 
-                              label="ADICIONAR FOTO AO APONTAMENTO" 
-                              onUpload={(img) => addFindingImage(f.id, img)} 
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-2 border-t border-black pt-4 mt-2 avoid-break">
-                        <div className="flex flex-col md:flex-row md:items-center gap-3">
-                          <div className="flex-1 flex items-center border border-black p-2 bg-green-50/20">
-                            <h4 className="text-[8px] font-black text-green-900 uppercase mr-3 whitespace-nowrap"><CheckCircle size={10} className="inline mr-1"/> Plano de Ação:</h4>
-                            <PrintableInput isPdfMode={isPdfMode} value={f.acao} onChange={e => updateFindingField(f.id, 'acao', e.target.value)} placeholder="Medida imediata..." />
-                          </div>
-                          <div className="md:w-1/3 flex items-center border border-black p-2 bg-green-50/20">
-                            <h4 className="text-[8px] font-black text-green-900 uppercase mr-3 whitespace-nowrap">Responsável:</h4>
-                            <PrintableInput isPdfMode={isPdfMode} value={f.resp} onChange={e => updateFindingField(f.id, 'resp', e.target.value)} placeholder="Responsável..." />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <section>
+                <h2 class="section-header flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i> 3. APONTAMENTOS E NÃO CONFORMIDADES
+                </h2>
+                <div id="findings-list" class="flex flex-col gap-6"></div>
             </section>
-          </div>
         </div>
 
-        {/* --- QUEBRA DE PÁGINA 2 PARA 3 --- */}
-        <div className="pdf-page-break"></div>
+        <div class="pdf-page-break"></div>
 
-        {/* --- PÁGINA 3: PARECER FINAL E ASSINATURAS --- */}
-        <div className="content-padding">
-          <div className="flex flex-col gap-8">
-            <section className="avoid-break block w-full">
-                <div className="flex justify-between items-center section-header">
-                  <h2 className="flex items-center gap-2">
-                    <CheckCircle size={14} /> 4. PARECER TÉCNICO E RECOMENDAÇÕES FINAIS
-                  </h2>
-                  {!isPdfMode && <button onClick={addFinalOpinion} className="bg-red-700 text-white p-1 hover:bg-red-800 transition-colors"><Plus size={12} /></button>}
-                </div>
-                <div className="flex flex-col gap-4 border border-black p-4 bg-slate-50/50">
-                    {finalOpinions.map((text, idx) => (
-                      <div key={idx} className="relative group flex gap-3 items-start border-b border-gray-200 pb-2 last:border-0">
-                         <span className="text-[10px] font-black text-slate-400 mt-1">ITEM {idx + 1}</span>
-                         <div className="flex-1">
-                            <PrintableTextArea 
-                              isPdfMode={isPdfMode} 
-                              value={text} 
-                              onChange={e => updateFinalOpinion(idx, e.target.value)} 
-                              placeholder="Conclusão fundamentada..." 
-                              rows={3} 
-                            />
-                         </div>
-                         {!isPdfMode && finalOpinions.length > 1 && (
-                            <button onClick={() => removeFinalOpinion(idx)} className="text-red-400 hover:text-red-700 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Trash2 size={12} />
-                            </button>
-                         )}
-                      </div>
-                    ))}
-                </div>
-                
-                <div className="mt-16 flex flex-col items-center avoid-break">
-                    <div className="w-80 border-t-2 border-black pt-2 text-center">
-                        <span className="text-sm font-black uppercase block text-black tracking-tight">Francisco Tiago da Silva Ferreira</span>
-                        <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-1 block">Auditor Interno Sênior / Especialista em Auditoria Interna</span>
-                        <span className="text-[9px] text-red-800 font-bold lowercase mt-0.5 block underline">auditoriainterna@diamantesl.com</span>
-                        <div className="mt-4 text-[8px] text-gray-400 font-bold uppercase">Assinado Eletronicamente — Criptografia SHA-256</div>
+        <!-- PÁGINA 3: PARECER E ASSINATURAS -->
+        <div class="content-padding p-6">
+            <section class="avoid-break">
+                <h2 class="section-header flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> 4. PARECER TÉCNICO E RECOMENDAÇÕES FINAIS
+                </h2>
+                <div id="final-opinions" class="flex flex-col gap-3 border border-black p-4 bg-slate-50/50"></div>
+                <button onclick="addOpinion()" class="no-print mt-2 text-[10px] font-bold text-red-700 flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3 h-3"></i> ADICIONAR TÓPICO AO PARECER
+                </button>
+
+                <div class="mt-20 flex flex-col items-center text-center">
+                    <div class="w-80 border-t-2 border-black pt-2">
+                        <span class="text-sm font-black uppercase block">Francisco Tiago da Silva Ferreira</span>
+                        <span class="text-[9px] text-gray-600 font-bold uppercase block mt-1">Auditor Interno Sênior / Especialista</span>
+                        <span class="text-[9px] text-red-800 font-bold lowercase block underline">auditoriainterna@diamantesl.com</span>
+                        <div class="mt-4 text-[8px] text-gray-400 font-bold uppercase">Assinado Eletronicamente — Criptografia SHA-256</div>
                     </div>
                 </div>
             </section>
-          </div>
 
-          <footer className="bg-slate-100 p-6 text-center border-t border-black mt-20 no-print-mt-auto">
-            <p className="text-[8px] text-gray-400 font-black uppercase tracking-[0.5em]">Laudo Gerado Via Sistema Integrado de Auditoria e Riscos</p>
-          </footer>
+            <footer class="bg-slate-100 p-6 text-center border-t border-black mt-20">
+                <p class="text-[8px] text-gray-400 font-black uppercase tracking-[0.5em]">Gerado Via Sistema de Auditoria — Diamante Lingerie</p>
+            </footer>
         </div>
-      </div>
     </div>
-  );
-}
+
+    <div id="toast" class="hidden fixed top-4 right-4 bg-green-700 text-white px-6 py-3 shadow-2xl z-50 flex items-center gap-3">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        <span id="toast-message" class="font-bold text-sm"></span>
+    </div>
+
+    <script>
+        // Inicializa ícones
+        lucide.createIcons();
+
+        // Dados Iniciais
+        let preliminarImages = [];
+        let findings = [{
+            id: Date.now(),
+            proc: 'Auditoria Interna de Descontos em Vendas',
+            evid: ['Análise do Ponto – Volume de Descontos por Loja\n\nA análise dos dados extraídos evidencia a concentração relevante de valores de desconto em um grupo específico de lojas e produtos.'],
+            nc: ['Desvio na política de descontos manuais sem registro de justificativa técnica no sistema de vendas.'],
+            acao: 'Implementar trava sistêmica para descontos superiores a 30% no PDV.',
+            resp: 'Gerência de TI / Comercial',
+            imgs: []
+        }];
+        let opinions = ['Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.'];
+
+        // Funções de UI
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3000);
+        }
+
+        // Matriz de Risco
+        function renderMatrix() {
+            const impactLabels = ['Mínimo', 'Leve', 'Moderado', 'Grave', 'Gravíssimo'];
+            const probLabels = ['(FC) 1 M. Alto', '(FC) 0.8 Alto', '(FC) 0.6 Médio', '(FC) 0.4 Baixo', '(FC) 0.2 M. Baixo'];
+            const levels = [
+                ['MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO', 'EXTREMO'],
+                ['MODERADO', 'ELEVADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],
+                ['BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],
+                ['BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO'],
+                ['BAIXO', 'BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO']
+            ];
+            const colors = [
+                ['bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600', 'bg-red-700'],
+                ['bg-emerald-600', 'bg-yellow-400', 'bg-yellow-400', 'bg-red-600', 'bg-red-700'],
+                ['bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600'],
+                ['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600'],
+                ['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400']
+            ];
+            const values = [['10%','30%','50%','75%','95%'],['8%','24%','40%','60%','76%'],['6%','18%','30%','45%','57%'],['4%','12%','20%','30%','38%'],['2%','6%','10%','15%','19%']];
+
+            let html = `<table class="w-full border-collapse border border-gray-300"><thead><tr><th class="border border-gray-300"></th>`;
+            impactLabels.forEach(l => html += `<th class="border border-gray-300 bg-gray-50 p-1 text-[7px] font-black uppercase">${l}</th>`);
+            html += `</tr></thead><tbody>`;
+
+            probLabels.forEach((p, r) => {
+                html += `<tr><td class="border border-gray-300 bg-gray-50 p-1 text-[7px] font-bold text-center">${p}</td>`;
+                levels[r].forEach((lvl, c) => {
+                    const color = colors[r][c];
+                    html += `<td class="border border-gray-300 p-0.5">
+                        <button onclick="selectRisk('${values[r][c]}', '${lvl}', '${impactLabels[c]}', '${p}')" class="w-full h-10 flex flex-col justify-center items-center ${color} hover:opacity-80 transition-opacity">
+                            <span class="text-[6px] font-black ${color.includes('yellow') ? 'text-gray-800' : 'text-white'}">${lvl}</span>
+                            <span class="text-[9px] font-black ${color.includes('yellow') ? 'text-gray-900' : 'text-white'}">${values[r][c]}</span>
+                        </button>
+                    </td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('risk-matrix-container').innerHTML = html;
+        }
+
+        function selectRisk(val, lvl, imp, prob) {
+            document.getElementById('risk-result').innerHTML = `
+                <p class="text-[10px] font-bold text-slate-700 mb-1">IMPACTO: ${imp.toUpperCase()} | PROBABILIDADE: ${prob.toUpperCase()}</p>
+                <p class="text-[13px] font-black uppercase text-red-900">VALOR: ${val} — ${lvl}</p>
+            `;
+        }
+
+        // Gerenciamento de Imagens
+        function addImage(type, findingId = null) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (type === 'preliminar') {
+                        preliminarImages.push(reader.result);
+                        renderPrelimImages();
+                    } else {
+                        const f = findings.find(x => x.id === findingId);
+                        f.imgs.push(reader.result);
+                        renderFindings();
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        function renderPrelimImages() {
+            const container = document.getElementById('preliminar-images');
+            container.innerHTML = preliminarImages.map((img, i) => `
+                <div class="relative border border-gray-200">
+                    <img src="${img}" class="w-full h-auto max-h-40 object-contain">
+                    <button onclick="preliminarImages.splice(${i}, 1); renderPrelimImages()" class="no-print absolute top-1 right-1 bg-red-700 text-white p-1">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Findings
+        function renderFindings() {
+            const container = document.getElementById('findings-list');
+            container.innerHTML = findings.map((f, i) => `
+                <div class="border border-black bg-white overflow-hidden avoid-break">
+                    <div class="bg-slate-900 p-2 border-b border-black flex justify-between">
+                        <span class="text-[10px] font-black uppercase text-white tracking-widest">Detalhamento Técnico ${i+1}</span>
+                        <button onclick="findings = findings.filter(x => x.id !== ${f.id}); renderFindings()" class="no-print text-red-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="p-4 flex flex-col gap-4">
+                        <div>
+                            <label class="text-[8px] font-black text-gray-400 uppercase">Processo Auditado</label>
+                            <div class="border border-black p-1 bg-slate-50">
+                                <input type="text" value="${f.proc}" onchange="findings[${i}].proc = this.value; document.getElementById('display-main-title').innerText = this.value.toUpperCase()">
+                            </div>
+                        </div>
+                        <div class="border border-black p-3">
+                            <h4 class="text-[9px] font-black text-red-900 uppercase mb-2">Fatos / Evidências</h4>
+                            ${f.evid.map((e, ei) => `<div class="flex gap-2 mb-2"><span class="text-[9px] font-bold">[${ei+1}]</span><textarea rows="1" onchange="findings[${i}].evid[${ei}] = this.value">${e}</textarea></div>`).join('')}
+                            <button onclick="findings[${i}].evid.push(''); renderFindings()" class="no-print text-[9px] font-bold text-red-700">+ ADD FATO</button>
+                        </div>
+                        <div class="border border-black p-3">
+                            <h4 class="text-[9px] font-black text-red-900 uppercase mb-2">Não Conformidades</h4>
+                            ${f.nc.map((n, ni) => `<div class="flex gap-2 mb-2"><span class="text-[9px] font-bold">[${ni+1}]</span><textarea rows="1" onchange="findings[${i}].nc[${ni}] = this.value">${n}</textarea></div>`).join('')}
+                            <button onclick="findings[${i}].nc.push(''); renderFindings()" class="no-print text-[9px] font-bold text-red-700">+ ADD NC</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${f.imgs.map((img, imi) => `
+                                <div class="relative border border-gray-100 p-1">
+                                    <img src="${img}" class="max-h-32 mx-auto">
+                                    <button onclick="findings[${i}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-1 right-1 bg-red-700 text-white p-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button onclick="addImage('finding', ${f.id})" class="no-print text-[9px] font-bold bg-slate-100 p-2 border border-dashed border-slate-300">VINCULAR IMAGEM AO APONTAMENTO</button>
+                        <div class="flex gap-2 border-t border-black pt-4">
+                            <div class="flex-1 border border-black p-2 bg-green-50/20"><label class="text-[7px] font-bold uppercase block">Plano de Ação</label><input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value"></div>
+                            <div class="w-1/3 border border-black p-2 bg-green-50/20"><label class="text-[7px] font-bold uppercase block">Responsável</label><input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Opinions
+        function renderOpinions() {
+            const container = document.getElementById('final-opinions');
+            container.innerHTML = opinions.map((o, i) => `
+                <div class="flex gap-3 border-b border-gray-100 pb-2 mb-2 last:border-0">
+                    <span class="text-[9px] font-black text-slate-400">ITEM ${i+1}</span>
+                    <textarea class="flex-1" rows="2" onchange="opinions[${i}] = this.value">${o}</textarea>
+                    <button onclick="opinions.splice(${i}, 1); renderOpinions()" class="no-print text-red-400"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function addOpinion() { opinions.push(''); renderOpinions(); }
+
+        // PDF
+        function generatePDF() {
+            const element = document.getElementById('printable-dashboard');
+            
+            // Remove foca de qualquer input antes de gerar
+            document.activeElement.blur();
+
+            const opt = {
+                margin: 0,
+                filename: `Laudo_Auditoria_${document.getElementById('input-rel').value}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            showToast("Gerando PDF oficial...");
+            html2pdf().set(opt).from(element).save().then(() => {
+                showToast("PDF gerado com sucesso!");
+            });
+        }
+
+        // Inicialização
+        window.onload = () => {
+            renderMatrix();
+            renderPrelimImages();
+            renderFindings();
+            renderOpinions();
+        };
+    </script>
+</body>
+</html>
