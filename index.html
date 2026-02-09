@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Laudo de Auditoria - Diamantes Lingerie</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+        .laudo-container { background: white; width: 800px; margin: auto; padding: 30px; border-top: 10px solid #b30000; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .titulo { text-align: center; color: #b30000; font-weight: bold; font-size: 22px; margin: 20px 0; }
+        .tabela-info { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .tabela-info td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
+        .label { background: #eee; font-weight: bold; width: 150px; }
+        .matriz-risco { margin-top: 20px; width: 100%; text-align: center; border-collapse: collapse; }
+        .matriz-risco th, .matriz-risco td { border: 1px solid #333; padding: 10px; color: white; font-weight: bold; }
+        .btn-gerar { background: #b30000; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; margin-bottom: 20px; }
+        @media print { .btn-gerar { display: none; } }
+    </style>
+</head>
+<body>
+
+    <center>
+        <button class="btn-gerar" onclick="gerarPDF()">GERAR PDF OFICIAL</button>
+    </center>
+
+    <div id="conteudo-laudo" class="laudo-container">
+        <div class="header">
+            <div>
+                <strong>COMPLIANCE & AUDITORIA INTERNA</strong><br>
+                <small>LAUDO DE AUDITORIA INTERNA</small>
+            </div>
+            <div style="text-align: right;">
+                <small>REF: 09/02/2026</small>
+            </div>
+        </div>
+
+        <div class="titulo">AUDITORIA INTERNA DE DESCONTOS EM VENDAS</div>
+
+        <table class="tabela-info">
+            <tr>
+                <td class="label">ÁREA AUDITADA:</td>
+                <td>Comercial</td>
+                <td class="label">LAUDO Nº:</td>
+                <td>289</td>
+            </tr>
+            <tr>
+                <td class="label">OBJETIVO:</td>
+                <td colspan="3">Auditar conformidade fiscal e operacional de descontos superiores a 30%.</td>
+            </tr>
+            <tr>
+                <td class="label">VALOR AGREGADO:</td>
+                <td>R$ 763.387,24</td>
+                <td class="label">NC'S:</td>
+                <td>1</td>
+            </tr>
+        </table>
+
+        <h3>1. MATRIZ DE RISCO DA AUDITORIA</h3>
+        <table class="matriz-risco">
+            <tr>
+                <th style="background: #2ecc71;">MODERADO (10%)</th>
+                <th style="background: #f1c40f;">ELEVADO (30%)</th>
+                <th style="background: #e67e22;">EXTREMO (50%)</th>
+                <th style="background: #c0392b;">GRAVÍSSIMO (95%)</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function gerarPDF() {
+            const element = document.getElementById('conteudo-laudo');
+            html2pdf().from(element).save('Laudo_Auditoria_Diamantes.pdf');
+        }
+    </script>
+</body>
+</html>
