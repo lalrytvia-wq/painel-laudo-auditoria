@@ -20,12 +20,14 @@
 
         * { border-radius: 0 !important; }
 
+        /* --- REGRAS DE IMPRESSÃO E QUEBRA --- */
         .avoid-break { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important;
             display: block;
             width: 100%;
             margin-bottom: 10px;
+            position: relative; /* Contexto para posicionamento */
         }
 
         .pdf-page-break { display: none; }
@@ -137,7 +139,7 @@
             pointer-events: none;
         }
 
-        /* --- DESIGN DOS BOTÕES DISCRETOS --- */
+        /* --- BOTÕES DISCRETOS --- */
         .layout-toolbar {
             position: fixed;
             bottom: 20px;
@@ -194,14 +196,12 @@
             cursor: grabbing;
         }
 
-        /* Estilo quando um item está sendo arrastado */
         .dragging {
             opacity: 0.5;
             background: #f1f5f9;
             border: 2px dashed #94a3b8;
         }
 
-        /* Estilo da linha de destino ao arrastar */
         .drag-over {
             border-top: 3px solid #3b82f6 !important;
             margin-top: 5px;
@@ -289,6 +289,18 @@
         .layout-mode-active .manual-spacer .delete-item-btn {
             display: flex;
         }
+        
+        /* Separação visual entre itens numerados */
+        .list-item-separator {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .list-item-separator:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
 
         @media print {
             @page { margin: 10mm; size: A4 portrait; }
@@ -309,6 +321,9 @@
             
             .manual-spacer { border: none; background: transparent; }
             .manual-spacer::before { display: none; }
+            
+            /* Remove bordas de layout do modo de edição se ficarem presas */
+            .printable-area { border: none !important; }
         }
     </style>
 </head>
@@ -758,7 +773,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="paperclip" class="w-2.5 h-2.5"></i> Evidências</h4>
                                     ${f.evid.map((e, ei) => `
-                                        <div class="flex gap-2 mb-1.5 items-start">
+                                        <div class="flex gap-2 items-start list-item-separator">
                                             <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ei+1}]</span>
                                             <div class="flex-1">
                                                 <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].evid[${ei}] = this.value">${e}</textarea>
@@ -770,7 +785,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Conformidades</h4>
                                     ${f.nc.map((n, ni) => `
-                                        <div class="flex gap-2 mb-1.5 items-start">
+                                        <div class="flex gap-2 items-start list-item-separator">
                                             <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ni+1}]</span>
                                             <div class="flex-1">
                                                 <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].nc[${ni}] = this.value">${n}</textarea>
