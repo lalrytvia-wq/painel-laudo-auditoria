@@ -15,6 +15,7 @@
             background-color: #f1f5f9;
             color: #1e293b;
             line-height: 1.4;
+            padding-bottom: 80px; /* Espaço para a barra fixa */
         }
 
         * { border-radius: 0 !important; }
@@ -80,7 +81,6 @@
             margin-bottom: 8px;
         }
 
-        /* Estilo para garantir que o texto quebre corretamente no painel */
         .dynamic-textarea {
             background: transparent;
             width: 100%;
@@ -102,7 +102,6 @@
             font-weight: 700;
         }
 
-        /* Estilo para a versão estática no PDF */
         .pdf-static-text {
             display: block;
             word-wrap: break-word;
@@ -114,7 +113,6 @@
             width: 100%;
         }
 
-        /* Destaque da Matriz Selecionada */
         .risk-btn-selected {
             outline: 2px solid #000;
             z-index: 10;
@@ -122,16 +120,15 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* --- CLASSE PARA IMAGEM REDIMENSIONÁVEL --- */
         .resizable-wrapper {
-            resize: both;           /* Habilita redimensionamento manual */
-            overflow: hidden;       /* Necessário para o resize funcionar */
+            resize: both;
+            overflow: hidden;
             position: relative;
             border: 1px solid #e2e8f0;
             background-color: #fff;
             min-width: 100px;
             min-height: 100px;
-            display: inline-flex;   /* Permite que o elemento flua e seja redimensionável */
+            display: inline-flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -139,32 +136,139 @@
             max-width: 100%;
         }
         
-        /* A imagem ocupa 100% do container redimensionável, mantendo proporção */
         .resizable-wrapper img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            pointer-events: none; /* Garante que o clique/arraste não seja bloqueado pela img */
+            pointer-events: none;
+        }
+
+        /* --- ESTILOS DE AJUSTE DE PÁGINA --- */
+        .layout-toolbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1e293b;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 50;
+            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .manual-break {
+            border-top: 2px dashed #ef4444;
+            margin: 15px 0;
+            height: 24px;
+            background-color: #fef2f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: default;
+        }
+        
+        .manual-break::after {
+            content: "QUEBRA DE PÁGINA (PDF)";
+            font-size: 10px;
+            font-weight: 900;
+            color: #ef4444;
+        }
+
+        .manual-spacer {
+            background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #e2e8f0 10px, #e2e8f0 20px);
+            border: 1px dashed #94a3b8;
+            resize: vertical;
+            overflow: hidden;
+            min-height: 20px;
+            margin: 5px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .manual-spacer::before {
+            content: "↕ ESPAÇADOR (Arraste para ajustar)";
+            font-size: 9px;
+            font-weight: 700;
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .add-layout-btn {
+            display: none; /* Mostrado apenas no modo ajuste */
+            background-color: #3b82f6;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 4px auto;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            width: fit-content;
+            opacity: 0.8;
+        }
+        .add-layout-btn:hover { opacity: 1; }
+
+        .layout-mode-active .add-layout-btn { display: flex; }
+        .layout-mode-active .printable-area { border: 2px solid #3b82f6; }
+
+        .delete-item-btn {
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 2px;
+            border-radius: 4px;
+            display: none;
+            cursor: pointer;
+        }
+        
+        .layout-mode-active .manual-break .delete-item-btn,
+        .layout-mode-active .manual-spacer .delete-item-btn {
+            display: block;
         }
 
         @media print {
             @page { margin: 10mm; size: A4 portrait; }
             body { background: white !important; padding: 0 !important; }
             .printable-area { margin: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; }
-            .no-print { display: none !important; }
+            .no-print, .layout-toolbar, .add-layout-btn, .delete-item-btn { display: none !important; }
             .pdf-page-break { display: block; page-break-after: always; height: 0; }
             .content-padding { padding: 10mm !important; }
             
             textarea, input { border: none !important; }
+            .resizable-wrapper { resize: none; }
             
-            /* Remove a alça de resize na impressão/PDF para ficar limpo */
-            .resizable-wrapper {
-                resize: none;
+            /* Renderização dos Ajustes no PDF */
+            .manual-break {
+                border: none;
+                background: transparent;
+                height: 0;
+                margin: 0;
+                page-break-after: always !important;
+                page-break-inside: avoid;
             }
+            .manual-break::after { display: none; }
+            
+            .manual-spacer {
+                border: none;
+                background: transparent;
+                /* Altura é mantida pelo estilo inline do resize */
+            }
+            .manual-spacer::before { display: none; }
         }
     </style>
 </head>
-<body>
+<body class="">
 
     <div id="printable-dashboard" class="printable-area">
         
@@ -187,9 +291,6 @@
                 <div class="text-right">
                     <div class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-001</div>
                     <p class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: 09/02/2026</p>
-                    <button onclick="generatePDF()" class="no-print mt-1.5 bg-white text-red-800 px-2 py-0.5 font-black text-[8px] uppercase shadow hover:bg-red-50 flex items-center gap-1">
-                        <i data-lucide="file-down" class="w-3 h-3"></i> Gerar PDF Oficial
-                    </button>
                 </div>
             </div>
 
@@ -251,6 +352,8 @@
                     </div>
                 </div>
             </div>
+            
+            <div id="extra-break-1"></div>
         </div>
 
         <!-- PÁGINA 2: CONTEXTO E APONTAMENTOS -->
@@ -270,19 +373,24 @@ Fortalecimento dos Controles Internos
 Determinar a implementação ou o reforço de controles sistêmicos que impeçam a aplicação de descontos acima dos limites definidos sem autorização prévia.</textarea>
                 </div>
                 
-                <!-- Container Flex para imagens redimensionáveis -->
                 <div id="preliminar-images" class="flex flex-wrap gap-2 mb-2"></div>
                 
                 <button onclick="addImage('preliminar')" class="no-print mt-1.5 text-[8px] font-black text-red-700 flex items-center gap-1 uppercase tracking-tighter">
                     <i data-lucide="plus" class="w-3 h-3"></i> Adicionar Anexo ao Contexto
                 </button>
             </section>
+            
+            <div id="extra-break-2"></div>
 
             <section>
                 <h2 class="section-header flex items-center gap-2">
                     <i data-lucide="alert-triangle" class="w-3 h-3"></i> 3. APONTAMENTOS E NÃO CONFORMIDADES
                 </h2>
                 <div id="findings-list" class="flex flex-col gap-4"></div>
+                
+                <div class="mt-4 text-center no-print">
+                   <button onclick="addFinding()" class="bg-red-700 text-white px-3 py-1 font-bold text-xs rounded uppercase hover:bg-red-800">+ Novo Apontamento</button>
+                </div>
             </section>
         </div>
 
@@ -313,6 +421,16 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         </div>
     </div>
 
+    <!-- BARRA DE FERRAMENTAS FLUTUANTE -->
+    <div class="layout-toolbar">
+        <button onclick="toggleLayoutMode()" id="btn-toggle-layout" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded text-sm font-bold uppercase">
+            <i data-lucide="settings-2" class="w-4 h-4"></i> <span id="txt-layout-mode">Ativar Ajuste de Página</span>
+        </button>
+        <button onclick="generatePDF()" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-1.5 rounded text-sm font-bold uppercase">
+            <i data-lucide="file-down" class="w-4 h-4"></i> Gerar PDF
+        </button>
+    </div>
+
     <div id="toast" class="hidden fixed top-4 right-4 bg-slate-900 text-white px-5 py-2.5 shadow-2xl z-50 flex items-center gap-2">
         <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
         <span id="toast-message" class="font-bold text-xs uppercase"></span>
@@ -321,8 +439,53 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
     <script>
         lucide.createIcons();
 
-        // Estado do Risco Selecionado (Padrão 95%)
+        let isLayoutMode = false;
         let selectedRiskCoord = { r: 0, c: 4 };
+
+        // Dados Iniciais
+        let preliminarImages = [];
+        
+        // Findings agora suportam tipos: 'finding', 'break', 'spacer'
+        let findings = [{
+            id: Date.now(),
+            type: 'finding',
+            proc: 'Auditoria Interna de Descontos em Vendas',
+            evid: ['Análise do Ponto – Volume de Descontos por Loja\n\nA análise dos dados extraídos evidencia a concentração relevante de valores de desconto em um grupo específico de lojas e produtos.'],
+            nc: ['Desvio na política de descontos manuais sem registro de justificativa técnica no sistema de vendas.'],
+            acao: 'Implementar trava sistêmica para descontos superiores a 30% no PDV.',
+            resp: 'Gerência de TI / Comercial',
+            imgs: []
+        }];
+        
+        let opinions = [{ id: Date.now(), type: 'text', value: 'Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.' }];
+
+        // Ajustes Extras (entre seções estáticas)
+        let extraBreaks = {
+            afterMatrix: [], // Array de {type: 'break'|'spacer', id: ...}
+            afterContext: []
+        };
+
+        function toggleLayoutMode() {
+            isLayoutMode = !isLayoutMode;
+            document.body.classList.toggle('layout-mode-active', isLayoutMode);
+            
+            const btn = document.getElementById('btn-toggle-layout');
+            const txt = document.getElementById('txt-layout-mode');
+            
+            if (isLayoutMode) {
+                btn.classList.replace('bg-blue-600', 'bg-slate-600');
+                txt.innerText = "Fechar Ajuste";
+                showToast("Modo de Ajuste Ativado: Use os botões azuis (+) para inserir quebras.");
+            } else {
+                btn.classList.replace('bg-slate-600', 'bg-blue-600');
+                txt.innerText = "Ativar Ajuste de Página";
+            }
+            
+            // Re-render para mostrar botões
+            renderExtraBreaks();
+            renderFindings();
+            renderOpinions();
+        }
 
         function initAutoResize() {
             document.querySelectorAll('.dynamic-textarea').forEach(textarea => {
@@ -335,18 +498,6 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             });
         }
 
-        let preliminarImages = [];
-        let findings = [{
-            id: Date.now(),
-            proc: 'Auditoria Interna de Descontos em Vendas',
-            evid: ['Análise do Ponto – Volume de Descontos por Loja\n\nA análise dos dados extraídos evidencia a concentração relevante de valores de desconto em um grupo específico de lojas e produtos.'],
-            nc: ['Desvio na política de descontos manuais sem registro de justificativa técnica no sistema de vendas.'],
-            acao: 'Implementar trava sistêmica para descontos superiores a 30% no PDV.',
-            resp: 'Gerência de TI / Comercial',
-            imgs: []
-        }];
-        let opinions = ['Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.'];
-
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toast-message').innerText = msg;
@@ -354,6 +505,221 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             setTimeout(() => t.classList.add('hidden'), 3000);
         }
 
+        // --- MANIPULAÇÃO DE DADOS ---
+        
+        function addFinding() {
+            findings.push({
+                id: Date.now(),
+                type: 'finding',
+                proc: '',
+                evid: [''],
+                nc: [''],
+                acao: '',
+                resp: '',
+                imgs: []
+            });
+            renderFindings();
+        }
+
+        function addLayoutItem(target, index, itemType) {
+            const newItem = { id: Date.now(), type: itemType };
+            if (itemType === 'spacer') newItem.height = 30; // Altura inicial
+
+            if (target === 'findings') {
+                findings.splice(index + 1, 0, newItem);
+                renderFindings();
+            } else if (target === 'opinions') {
+                opinions.splice(index + 1, 0, newItem);
+                renderOpinions();
+            } else if (target === 'extra1') {
+                extraBreaks.afterMatrix.push(newItem);
+                renderExtraBreaks();
+            } else if (target === 'extra2') {
+                extraBreaks.afterContext.push(newItem);
+                renderExtraBreaks();
+            }
+        }
+
+        function removeLayoutItem(target, id) {
+            if (target === 'findings') {
+                findings = findings.filter(i => i.id !== id);
+                renderFindings();
+            } else if (target === 'opinions') {
+                opinions = opinions.filter(i => i.id !== id);
+                renderOpinions();
+            } else if (target === 'extra1') {
+                extraBreaks.afterMatrix = extraBreaks.afterMatrix.filter(i => i.id !== id);
+                renderExtraBreaks();
+            } else if (target === 'extra2') {
+                extraBreaks.afterContext = extraBreaks.afterContext.filter(i => i.id !== id);
+                renderExtraBreaks();
+            }
+        }
+
+        // --- RENDERIZADORES ---
+
+        function getLayoutButtonsHTML(target, index) {
+            return `
+                <div class="flex justify-center gap-2 my-1">
+                    <div class="add-layout-btn" onclick="addLayoutItem('${target}', ${index}, 'break')">
+                        <i data-lucide="scissors" class="w-3 h-3"></i> + Quebra
+                    </div>
+                    <div class="add-layout-btn" onclick="addLayoutItem('${target}', ${index}, 'spacer')">
+                        <i data-lucide="move-vertical" class="w-3 h-3"></i> + Espaço
+                    </div>
+                </div>
+            `;
+        }
+
+        function getLayoutItemHTML(item, target) {
+            if (item.type === 'break') {
+                return `
+                    <div class="manual-break">
+                        <div class="delete-item-btn" onclick="removeLayoutItem('${target}', ${item.id})"><i data-lucide="trash" class="w-3 h-3"></i></div>
+                    </div>
+                `;
+            } else if (item.type === 'spacer') {
+                return `
+                    <div class="manual-spacer" style="height: ${item.height || 30}px">
+                        <div class="delete-item-btn" onclick="removeLayoutItem('${target}', ${item.id})"><i data-lucide="trash" class="w-3 h-3"></i></div>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function renderExtraBreaks() {
+            // Extra Break 1 (After Matrix)
+            const c1 = document.getElementById('extra-break-1');
+            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; // -1 pois sempre adiciona no final
+            extraBreaks.afterMatrix.forEach(item => {
+                html1 += getLayoutItemHTML(item, 'extra1');
+            });
+            c1.innerHTML = html1;
+
+            // Extra Break 2 (After Context)
+            const c2 = document.getElementById('extra-break-2');
+            let html2 = isLayoutMode ? getLayoutButtonsHTML('extra2', -1) : '';
+            extraBreaks.afterContext.forEach(item => {
+                html2 += getLayoutItemHTML(item, 'extra2');
+            });
+            c2.innerHTML = html2;
+            
+            lucide.createIcons();
+        }
+
+        function renderFindings() {
+            const container = document.getElementById('findings-list');
+            let html = '';
+
+            // Botão inicial se lista vazia ou no topo? 
+            // Simplificando: Botões sempre APÓS o item. Para inserir antes do primeiro, usamos a lógica do "After Context" (extra-break-2).
+
+            findings.forEach((f, i) => {
+                if (f.type === 'break' || f.type === 'spacer') {
+                    html += getLayoutItemHTML(f, 'findings');
+                } else {
+                    // Renderização Normal do Finding
+                    html += `
+                        <div class="border border-black bg-white overflow-hidden avoid-break relative group">
+                            <div class="bg-slate-900 p-1.5 border-b border-black flex justify-between items-center">
+                                <span class="text-[9px] font-black uppercase text-white tracking-widest px-1">Apontamento</span>
+                                <button onclick="removeLayoutItem('findings', ${f.id})" class="no-print text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                            <div class="p-3 flex flex-col gap-3">
+                                <div>
+                                    <label class="text-[7px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Objeto do Exame</label>
+                                    <div class="border border-black p-1 bg-slate-50">
+                                        <input type="text" value="${f.proc}" onchange="findings[${i}].proc = this.value; document.getElementById('display-main-title').innerText = this.value.toUpperCase()">
+                                    </div>
+                                </div>
+                                <div class="border border-black p-2 bg-white">
+                                    <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="paperclip" class="w-2.5 h-2.5"></i> Evidências</h4>
+                                    ${f.evid.map((e, ei) => `
+                                        <div class="flex gap-2 mb-1.5 items-start">
+                                            <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ei+1}]</span>
+                                            <div class="flex-1">
+                                                <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].evid[${ei}] = this.value">${e}</textarea>
+                                            </div>
+                                            <button onclick="findings[${i}].evid.splice(${ei}, 1); renderFindings()" class="no-print text-red-300 mt-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                        </div>`).join('')}
+                                    <button onclick="findings[${i}].evid.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Fato</button>
+                                </div>
+                                <div class="border border-black p-2 bg-white">
+                                    <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Conformidades</h4>
+                                    ${f.nc.map((n, ni) => `
+                                        <div class="flex gap-2 mb-1.5 items-start">
+                                            <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ni+1}]</span>
+                                            <div class="flex-1">
+                                                <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].nc[${ni}] = this.value">${n}</textarea>
+                                            </div>
+                                            <button onclick="findings[${i}].nc.splice(${ni}, 1); renderFindings()" class="no-print text-red-300 mt-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                        </div>`).join('')}
+                                    <button onclick="findings[${i}].nc.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Desvio</button>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${f.imgs.map((img, imi) => `
+                                        <div class="resizable-wrapper" style="width: 24%; height: 120px;">
+                                            <img src="${img}">
+                                            <button onclick="findings[${i}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5 z-20"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <button onclick="addImage('finding', ${f.id})" class="no-print text-[7px] font-bold bg-slate-50 border border-dashed border-slate-300 p-1">+ Foto</button>
+
+                                <div class="flex flex-col gap-1.5 border-t border-black pt-2">
+                                    <div class="flex-1 flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Plano Ação:</label><input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value"></div>
+                                    <div class="w-full flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Responsável:</label><input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (isLayoutMode) {
+                    html += getLayoutButtonsHTML('findings', i);
+                }
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+            initAutoResize();
+        }
+
+        function renderOpinions() {
+            const container = document.getElementById('final-opinions');
+            let html = '';
+
+            opinions.forEach((o, i) => {
+                if (o.type === 'break' || o.type === 'spacer') {
+                    html += getLayoutItemHTML(o, 'opinions');
+                } else {
+                    html += `
+                        <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start">
+                            <span class="text-[9px] font-black text-slate-400 mt-1">#</span>
+                            <div class="flex-1">
+                                <textarea class="dynamic-textarea" rows="1" onchange="opinions[${i}].value = this.value">${o.value}</textarea>
+                            </div>
+                            <button onclick="removeLayoutItem('opinions', ${o.id})" class="no-print text-red-400 mt-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                        </div>
+                    `;
+                }
+                if (isLayoutMode) {
+                    html += getLayoutButtonsHTML('opinions', i);
+                }
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+            initAutoResize();
+        }
+
+        function addOpinion() { 
+            opinions.push({ id: Date.now(), type: 'text', value: '' }); 
+            renderOpinions(); 
+        }
+
+        // --- MATRIZ E IMAGENS (Inalterados mas necessários para funcionamento) ---
         function renderMatrix() {
             const impactLabels = ['Mínimo', 'Leve', 'Moderado', 'Grave', 'Gravíssimo'];
             const probLabels = ['(FC) 1 M. Alto', '(FC) 0.8 Alto', '(FC) 0.6 Médio', '(FC) 0.4 Baixo', '(FC) 0.2 M. Baixo'];
@@ -440,89 +806,13 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             lucide.createIcons();
         }
 
-        function renderFindings() {
-            const container = document.getElementById('findings-list');
-            container.innerHTML = findings.map((f, i) => `
-                <div class="border border-black bg-white overflow-hidden avoid-break">
-                    <div class="bg-slate-900 p-1.5 border-b border-black flex justify-between items-center">
-                        <span class="text-[9px] font-black uppercase text-white tracking-widest px-1">Apontamento ${i+1}</span>
-                        <button onclick="findings = findings.filter(x => x.id !== ${f.id}); renderFindings()" class="no-print text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
-                    </div>
-                    <div class="p-3 flex flex-col gap-3">
-                        <div>
-                            <label class="text-[7px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Objeto do Exame</label>
-                            <div class="border border-black p-1 bg-slate-50">
-                                <input type="text" value="${f.proc}" onchange="findings[${i}].proc = this.value; document.getElementById('display-main-title').innerText = this.value.toUpperCase()">
-                            </div>
-                        </div>
-                        <div class="border border-black p-2 bg-white">
-                            <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="paperclip" class="w-2.5 h-2.5"></i> Evidências</h4>
-                            ${f.evid.map((e, ei) => `
-                                <div class="flex gap-2 mb-1.5 items-start">
-                                    <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ei+1}]</span>
-                                    <div class="flex-1">
-                                        <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].evid[${ei}] = this.value">${e}</textarea>
-                                    </div>
-                                    <button onclick="findings[${i}].evid.splice(${ei}, 1); renderFindings()" class="no-print text-red-300 mt-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                                </div>`).join('')}
-                            <button onclick="findings[${i}].evid.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Fato</button>
-                        </div>
-                        <div class="border border-black p-2 bg-white">
-                            <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Conformidades</h4>
-                            ${f.nc.map((n, ni) => `
-                                <div class="flex gap-2 mb-1.5 items-start">
-                                    <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ni+1}]</span>
-                                    <div class="flex-1">
-                                        <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].nc[${ni}] = this.value">${n}</textarea>
-                                    </div>
-                                    <button onclick="findings[${i}].nc.splice(${ni}, 1); renderFindings()" class="no-print text-red-300 mt-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                                </div>`).join('')}
-                            <button onclick="findings[${i}].nc.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Desvio</button>
-                        </div>
-                        
-                        <!-- Grid de Imagens com Resize -->
-                        <div class="flex flex-wrap gap-2">
-                            ${f.imgs.map((img, imi) => `
-                                <div class="resizable-wrapper" style="width: 24%; height: 120px;">
-                                    <img src="${img}">
-                                    <button onclick="findings[${i}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5 z-20"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <div class="flex flex-col gap-1.5 border-t border-black pt-2">
-                            <div class="flex-1 flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Plano Ação:</label><input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value"></div>
-                            <div class="w-full flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Responsável:</label><input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value"></div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-            initAutoResize();
-        }
-
-        function renderOpinions() {
-            const container = document.getElementById('final-opinions');
-            container.innerHTML = opinions.map((o, i) => `
-                <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start">
-                    <span class="text-[9px] font-black text-slate-400 mt-1">#${i+1}</span>
-                    <div class="flex-1">
-                        <textarea class="dynamic-textarea" rows="1" onchange="opinions[${i}] = this.value">${o}</textarea>
-                    </div>
-                    <button onclick="opinions.splice(${i}, 1); renderOpinions()" class="no-print text-red-400 mt-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                </div>
-            `).join('');
-            lucide.createIcons();
-            initAutoResize();
-        }
-
-        function addOpinion() { opinions.push(''); renderOpinions(); }
-
         async function generatePDF() {
+            // Desativa modo layout antes de gerar para limpar interface
+            if (isLayoutMode) toggleLayoutMode();
+
             const originalElement = document.getElementById('printable-dashboard');
             const clone = originalElement.cloneNode(true);
             
-            // Conversão de formulários para blocos de texto (Fidelidade 100% ao PDF)
             clone.querySelectorAll('textarea').forEach((ta, idx) => {
                 const originalTa = originalElement.querySelectorAll('textarea')[idx];
                 const div = document.createElement('div');
@@ -576,6 +866,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
 
         window.onload = () => {
             renderMatrix();
+            renderExtraBreaks();
             renderPrelimImages();
             renderFindings();
             renderOpinions();
