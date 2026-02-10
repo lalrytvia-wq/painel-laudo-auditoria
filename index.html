@@ -122,27 +122,29 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* Enquadramento Proporcional e Legível para Imagens do Contexto */
-        .context-image-frame {
-            width: 100%;
-            height: auto; /* Altura automática baseada no conteúdo */
-            min-height: 120px; /* Altura mínima para garantir legibilidade */
-            background-color: #fff;
+        /* --- CLASSE PARA IMAGEM REDIMENSIONÁVEL --- */
+        .resizable-wrapper {
+            resize: both;           /* Habilita redimensionamento manual */
+            overflow: hidden;       /* Necessário para o resize funcionar */
+            position: relative;
             border: 1px solid #e2e8f0;
-            display: flex;
+            background-color: #fff;
+            min-width: 100px;
+            min-height: 100px;
+            display: inline-flex;   /* Permite que o elemento flua e seja redimensionável */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            position: relative;
-            padding: 4px;
+            vertical-align: top;
+            max-width: 100%;
         }
-
-        .context-image-frame img {
+        
+        /* A imagem ocupa 100% do container redimensionável, mantendo proporção */
+        .resizable-wrapper img {
             width: 100%;
-            height: auto; /* Ajuste proporcional */
-            max-height: 300px; /* Limite para não estourar a página verticalmente */
+            height: 100%;
             object-fit: contain;
-            display: block;
+            pointer-events: none; /* Garante que o clique/arraste não seja bloqueado pela img */
         }
 
         @media print {
@@ -154,6 +156,11 @@
             .content-padding { padding: 10mm !important; }
             
             textarea, input { border: none !important; }
+            
+            /* Remove a alça de resize na impressão/PDF para ficar limpo */
+            .resizable-wrapper {
+                resize: none;
+            }
         }
     </style>
 </head>
@@ -263,8 +270,8 @@ Fortalecimento dos Controles Internos
 Determinar a implementação ou o reforço de controles sistêmicos que impeçam a aplicação de descontos acima dos limites definidos sem autorização prévia.</textarea>
                 </div>
                 
-                <!-- Grid de Imagens do Contexto Ajustado para 3 Colunas (Escala Legível) -->
-                <div id="preliminar-images" class="grid grid-cols-3 gap-2 mb-2"></div>
+                <!-- Container Flex para imagens redimensionáveis -->
+                <div id="preliminar-images" class="flex flex-wrap gap-2 mb-2"></div>
                 
                 <button onclick="addImage('preliminar')" class="no-print mt-1.5 text-[8px] font-black text-red-700 flex items-center gap-1 uppercase tracking-tighter">
                     <i data-lucide="plus" class="w-3 h-3"></i> Adicionar Anexo ao Contexto
@@ -423,9 +430,9 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         function renderPrelimImages() {
             const container = document.getElementById('preliminar-images');
             container.innerHTML = preliminarImages.map((img, i) => `
-                <div class="relative border border-gray-200 context-image-frame bg-white">
+                <div class="resizable-wrapper bg-white shadow-sm" style="width: 32%; height: 200px;">
                     <img src="${img}">
-                    <button onclick="preliminarImages.splice(${i}, 1); renderPrelimImages()" class="no-print absolute top-0.5 right-0.5 bg-red-700 text-white p-0.5 shadow-sm">
+                    <button onclick="preliminarImages.splice(${i}, 1); renderPrelimImages()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-1 hover:bg-red-800 z-20">
                         <i data-lucide="trash-2" class="w-3 h-3"></i>
                     </button>
                 </div>
@@ -472,14 +479,17 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                                 </div>`).join('')}
                             <button onclick="findings[${i}].nc.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Desvio</button>
                         </div>
-                        <div class="grid grid-cols-4 gap-1">
+                        
+                        <!-- Grid de Imagens com Resize -->
+                        <div class="flex flex-wrap gap-2">
                             ${f.imgs.map((img, imi) => `
-                                <div class="relative border border-gray-100">
-                                    <img src="${img}" class="max-h-20 mx-auto">
-                                    <button onclick="findings[${i}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-1 right-1 bg-red-700 text-white p-0.5"><i data-lucide="trash-2" class="w-2.5 h-2.5"></i></button>
+                                <div class="resizable-wrapper" style="width: 24%; height: 120px;">
+                                    <img src="${img}">
+                                    <button onclick="findings[${i}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5 z-20"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                                 </div>
                             `).join('')}
                         </div>
+
                         <div class="flex flex-col gap-1.5 border-t border-black pt-2">
                             <div class="flex-1 flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Plano Ação:</label><input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value"></div>
                             <div class="w-full flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Responsável:</label><input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value"></div>
