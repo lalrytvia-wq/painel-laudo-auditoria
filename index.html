@@ -20,14 +20,33 @@
 
         * { border-radius: 0 !important; }
 
-        /* --- REGRAS DE IMPRESSÃO E QUEBRA --- */
+        /* --- REGRAS CRÍTICAS DE PAGINAÇÃO --- */
+        
+        /* Bloco principal indivisível (Apontamento inteiro) */
         .avoid-break { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important;
             display: block;
-            width: 100%;
+            position: relative; 
+            margin-bottom: 15px; /* Espaço extra para cálculo de quebra */
+        }
+
+        /* Itens internos (linhas numeradas) indivisíveis */
+        .list-item-separator {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            display: flex; /* Flex ajuda o html2canvas a calcular altura */
+        }
+        
+        /* Wrapper de cabeçalho de seção para evitar órfãs */
+        .section-header-wrapper {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            margin-top: 10px;
             margin-bottom: 10px;
-            position: relative; /* Contexto para posicionamento */
         }
 
         .pdf-page-break { display: none; }
@@ -289,18 +308,6 @@
         .layout-mode-active .manual-spacer .delete-item-btn {
             display: flex;
         }
-        
-        /* Separação visual entre itens numerados */
-        .list-item-separator {
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 6px;
-            margin-bottom: 6px;
-        }
-        .list-item-separator:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-            margin-bottom: 0;
-        }
 
         @media print {
             @page { margin: 10mm; size: A4 portrait; }
@@ -333,7 +340,7 @@
         
         <div class="content-padding p-4">
             <div class="text-center mb-3">
-                <h2 id="display-main-title" class="text-lg font-black uppercase text-red-800 tracking-tight">LAUDO TÉCNICO DE AUDITORIA</h2>
+                <h2 id="display-main-title" class="text-lg font-black uppercase text-red-800 tracking-tight">AUDITORIA INTERNA / DESCONTOS EM VENDAS</h2>
             </div>
 
             <div class="card-top-main flex justify-between items-center p-3">
@@ -346,9 +353,12 @@
                         <p class="text-[7px] font-bold uppercase mt-1">auditoriainterna@diamantesl.com</p>
                     </div>
                 </div>
-                <div class="text-right">
+                <div class="text-right flex flex-col items-end">
                     <div class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-001</div>
                     <p class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: 09/02/2026</p>
+                    <button onclick="clearData()" class="no-print mt-1.5 text-[8px] font-black bg-white text-red-800 px-1.5 py-0.5 uppercase hover:bg-red-50 flex items-center gap-1 shadow-sm border border-red-900">
+                        <i data-lucide="eraser" class="w-2.5 h-2.5"></i> Limpar Tudo
+                    </button>
                 </div>
             </div>
 
@@ -380,7 +390,7 @@
                     <tr>
                         <td class="cell-label">Valor Agregado:</td>
                         <td class="cell-value" colspan="1">
-                            <div class="flex items-center"><span>R$&nbsp;</span><input type="text" id="input-agreg" value=""></div>
+                            <div class="flex items-center"><span>R$&nbsp;</span><input type="text" id="input-agreg" value="763.387,24"></div>
                         </td>
                         <td class="cell-label w-20">Notific.:</td>
                         <td class="cell-value w-16"><input type="text" value="1" id="input-notific" class="text-center"></td>
@@ -389,14 +399,14 @@
                     </tr>
                     <tr>
                         <td class="cell-label">Gestor / Diretor:</td>
-                        <td class="cell-value" colspan="5"><input type="text" value="Aline Roberta / Daniele Sobral" id="input-gestor"></td>
+                        <td class="cell-value" colspan="5"><input type="text" value="Aline Roberta / Ilton Rogerio Tarnovski" id="input-gestor"></td>
                     </tr>
                 </table>
             </div>
 
             <div class="mt-4 border border-black p-3 avoid-break bg-white">
-                <div class="section-header flex items-center gap-2">
-                    <i data-lucide="grid" class="w-3 h-3"></i> 1. MATRIZ DE RISCO DA AUDITORIA
+                <div class="section-header-wrapper flex items-center gap-2">
+                    <span class="section-header"><i data-lucide="grid" class="w-3 h-3 inline"></i> 1. MATRIZ DE RISCO DA AUDITORIA</span>
                 </div>
                 <div id="risk-matrix-container"></div>
 
@@ -414,9 +424,9 @@
 
         <div class="content-padding p-4 pt-0">
             <section class="mb-6 avoid-break">
-                <h2 class="section-header flex items-center gap-2">
-                    <i data-lucide="info" class="w-3 h-3"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO
-                </h2>
+                <div class="section-header-wrapper flex items-center gap-2">
+                    <span class="section-header"><i data-lucide="info" class="w-3 h-3 inline"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO</span>
+                </div>
                 <div class="border border-black p-2 bg-white mb-2">
                     <textarea class="dynamic-textarea" id="input-preliminar" rows="4" placeholder="Cenário inicial...">Revisão das Políticas de Desconto
 Avaliar, em nível estratégico, a adequação dos limites máximos de desconto, critérios de exceção e níveis de alçada atualmente vigentes, considerando margem, competitividade e risco.
@@ -438,9 +448,9 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             <div id="extra-break-2"></div>
 
             <section>
-                <h2 class="section-header flex items-center gap-2">
-                    <i data-lucide="alert-triangle" class="w-3 h-3"></i> 3. APONTAMENTOS E NÃO CONFORMIDADES
-                </h2>
+                <div class="section-header-wrapper flex items-center gap-2">
+                    <span class="section-header"><i data-lucide="alert-triangle" class="w-3 h-3 inline"></i> 3. APONTAMENTOS E NÃO CONFORMIDADES</span>
+                </div>
                 <div id="findings-list" class="flex flex-col gap-4"></div>
                 
                 <div class="mt-4 text-center no-print">
@@ -451,9 +461,9 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
 
         <div class="content-padding p-4 pt-0">
             <section class="avoid-break">
-                <h2 class="section-header flex items-center gap-2">
-                    <i data-lucide="check-circle" class="w-3 h-3"></i> 4. PARECER TÉCNICO E RECOMENDAÇÕES FINAIS
-                </h2>
+                <div class="section-header-wrapper flex items-center gap-2">
+                    <span class="section-header"><i data-lucide="check-circle" class="w-3 h-3 inline"></i> 4. PARECER TÉCNICO E RECOMENDAÇÕES FINAIS</span>
+                </div>
                 <div id="final-opinions" class="flex flex-col gap-2 border border-black p-3 bg-slate-50/50"></div>
                 <button onclick="addOpinion()" class="no-print mt-1 text-[8px] font-black text-red-700 flex items-center gap-1 uppercase tracking-tighter">
                     <i data-lucide="plus" class="w-3 h-3"></i> Adicionar Tópico ao Parecer
@@ -499,18 +509,57 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
         let preliminarImages = [];
-        let findings = [{
-            id: generateId(),
-            type: 'finding',
-            proc: 'Auditoria Interna de Descontos em Vendas',
-            evid: ['Análise do Ponto – Volume de Descontos por Loja\n\nA análise dos dados extraídos evidencia a concentração relevante de valores de desconto em um grupo específico de lojas e produtos.'],
-            nc: ['Desvio na política de descontos manuais sem registro de justificativa técnica no sistema de vendas.'],
-            acao: 'Implementar trava sistêmica para descontos superiores a 30% no PDV.',
-            resp: 'Gerência de TI / Comercial',
-            imgs: []
-        }];
+        let findings = [
+            {
+                id: generateId(),
+                type: 'finding',
+                proc: 'Vendas com 100% de Desconto / Bonificações',
+                evid: [
+                    'Ocorrências concentradas nas lojas Matriz, João Pessoa 4 e Teresina 3 em agosto de 2025.',
+                    'Itens de alto valor agregado com 100% de desconto tratados como venda zerada (o correto seria CFOP 5.910 - Bonificação).'
+                ],
+                nc: [
+                    'Risco iminente de autuação por ICMS e omissão de receita devido à classificação incorreta.'
+                ],
+                acao: 'Reclassificar operações e ajustar parâmetros fiscais.',
+                resp: 'Fiscal / Loja',
+                imgs: []
+            },
+            {
+                id: generateId(),
+                type: 'finding',
+                proc: 'Anomalia Operacional - Arapiraca 2',
+                evid: [
+                    'Concessão concentrada de descontos entre 52% e 54% na loja Arapiraca 2 em 02/10/2025, totalizando mais de R$ 16 mil.',
+                    'Erosão recorrente de margens (~50%) em Itabaiana e Arapiraca 2.'
+                ],
+                nc: [
+                    'Padrão incompatível com a política comercial vigente.',
+                    'Indicativo de quebra de alçada ou prática não formalizada de vendas em condições atípicas.'
+                ],
+                acao: 'Auditar alçadas e justificar descontos.',
+                resp: 'Comercial',
+                imgs: []
+            },
+            {
+                id: generateId(),
+                type: 'finding',
+                proc: 'Fragilidade em Controles Sistêmicos',
+                evid: [
+                    'Sistema permite ajustes manuais de preços a colaboradores de áreas diversas, inclusive fora de Custos e Cadastro.'
+                ],
+                nc: [
+                    'Amplitude de acessos configura fragilidade de controle, elevando risco potencial de desvios futuros.'
+                ],
+                acao: 'Restringir permissões de ajuste de preço.',
+                resp: 'TI / Sistemas',
+                imgs: []
+            }
+        ];
         
-        let opinions = [{ id: generateId(), type: 'text', value: 'Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.' }];
+        let opinions = [
+            { id: generateId(), type: 'text', value: 'Recomendação de regularização fiscal imediata das operações de 100% de desconto e restrição rigorosa de acessos sistêmicos de alteração de preços.' }
+        ];
         let extraBreaks = { afterMatrix: [], afterContext: [] };
 
         // --- ARRASTAR E SOLTAR (DRAG & DROP) ---
@@ -637,6 +686,35 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             setTimeout(() => t.classList.add('hidden'), 3000);
         }
 
+        function clearData() {
+            if(!confirm('Tem certeza que deseja limpar todos os dados do formulário? Esta ação não pode ser desfeita.')) return;
+            
+            // Limpa inputs
+            document.getElementById('input-area').value = '';
+            document.getElementById('input-rel').value = '';
+            document.getElementById('input-obj').value = '';
+            document.getElementById('input-normas').value = '';
+            document.getElementById('input-agreg').value = '';
+            document.getElementById('input-notific').value = '';
+            document.getElementById('input-ncs').value = '';
+            document.getElementById('input-gestor').value = '';
+            document.getElementById('input-preliminar').value = '';
+            
+            // Reseta Arrays
+            preliminarImages = [];
+            findings = [];
+            opinions = []; 
+            extraBreaks = { afterMatrix: [], afterContext: [] };
+
+            // Re-renderiza tudo
+            renderPrelimImages();
+            renderFindings();
+            renderOpinions();
+            renderExtraBreaks();
+            
+            showToast("DADOS LIMPOS COM SUCESSO!");
+        }
+
         // --- MANIPULAÇÃO DE DADOS ---
         
         function addFinding() {
@@ -758,7 +836,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                 } else {
                     html += `
                     <div class="draggable-item" data-id="${f.id}">
-                        <div class="border border-black bg-white overflow-hidden avoid-break relative group">
+                        <div class="avoid-break border border-black bg-white overflow-hidden relative group">
                             <div class="bg-slate-900 p-1.5 border-b border-black flex justify-between items-center">
                                 <span class="text-[9px] font-black uppercase text-white tracking-widest px-1">Apontamento</span>
                                 <button onclick="removeLayoutItem('findings', '${f.id}')" class="no-print text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
@@ -835,7 +913,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                 } else {
                     html += `
                     <div class="draggable-item" data-id="${o.id}">
-                        <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start">
+                        <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start list-item-separator">
                             <span class="text-[9px] font-black text-slate-400 mt-1">#</span>
                             <div class="flex-1">
                                 <textarea class="dynamic-textarea" rows="1" onchange="opinions[${i}].value = this.value">${o.value}</textarea>
@@ -980,20 +1058,22 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             });
 
             const opt = {
-                margin: 0,
+                // Margens (Top, Left, Bottom, Right) em mm
+                // 30mm na margem inferior para evitar cortes
+                margin: [10, 10, 30, 10], 
                 filename: `Laudo_Auditoria_${document.getElementById('input-rel').value}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
+                image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
-                    scale: 3, 
+                    scale: 2, // Escala 2 é ideal para manter qualidade sem pesar
                     useCORS: true, 
-                    letterRendering: true,
-                    scrollY: 0,
-                    scrollX: 0
+                    letterRendering: true, // Importante para renderização de fontes
+                    scrollY: 0
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { 
                     mode: ['css', 'legacy'], 
-                    avoid: '.avoid-break' 
+                    // Lista rigorosa de seletores para evitar quebra
+                    avoid: ['.avoid-break', '.list-item-separator', '.section-header-wrapper'] 
                 }
             };
 
