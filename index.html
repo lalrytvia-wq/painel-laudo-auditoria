@@ -12,25 +12,23 @@
 
         body { 
             font-family: 'Inter', 'Segoe UI', sans-serif;
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             color: #1e293b;
             line-height: 1.4;
-            padding-bottom: 80px; /* Espaço para a barra fixa */
+            padding-bottom: 100px;
         }
 
         * { border-radius: 0 !important; }
 
-        /* Regras de Impressão e PDF - Blocos Indivisíveis */
         .avoid-break { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important;
             display: block;
             width: 100%;
+            margin-bottom: 10px;
         }
 
-        .pdf-page-break {
-            display: none;
-        }
+        .pdf-page-break { display: none; }
 
         .printable-area {
             max-width: 950px;
@@ -81,11 +79,14 @@
             margin-bottom: 8px;
         }
 
-        .dynamic-textarea {
+        .dynamic-textarea, input[type="text"] {
             background: transparent;
             width: 100%;
             outline: none;
             font-weight: 700;
+        }
+        
+        .dynamic-textarea {
             resize: none;
             overflow: hidden; 
             display: block;
@@ -93,13 +94,6 @@
             white-space: pre-wrap;
             line-height: 1.4;
             min-height: 1.4em;
-        }
-
-        input[type="text"] {
-            background: transparent;
-            width: 100%;
-            outline: none;
-            font-weight: 700;
         }
 
         .pdf-static-text {
@@ -143,44 +137,98 @@
             pointer-events: none;
         }
 
-        /* --- ESTILOS DE AJUSTE DE PÁGINA --- */
+        /* --- DESIGN DOS BOTÕES DISCRETOS --- */
         .layout-toolbar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #1e293b;
-            color: white;
-            padding: 10px;
+            bottom: 20px;
+            right: 20px;
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            z-index: 50;
-            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1);
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .discreet-btn {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .discreet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            color: #1e293b;
+            border-color: #cbd5e1;
+        }
+        
+        .btn-active {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+        
+        .btn-pdf:hover {
+            color: #b91c1c;
+            border-color: #fca5a5;
+            background-color: #fef2f2;
+        }
+
+        /* --- ARRASTAR E SOLTAR --- */
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        /* Estilo quando um item está sendo arrastado */
+        .dragging {
+            opacity: 0.5;
+            background: #f1f5f9;
+            border: 2px dashed #94a3b8;
+        }
+
+        /* Estilo da linha de destino ao arrastar */
+        .drag-over {
+            border-top: 3px solid #3b82f6 !important;
+            margin-top: 5px;
         }
 
         .manual-break {
             border-top: 2px dashed #ef4444;
-            margin: 15px 0;
-            height: 24px;
+            margin: 10px 0;
+            height: 30px;
             background-color: #fef2f2;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            cursor: default;
         }
         
         .manual-break::after {
-            content: "QUEBRA DE PÁGINA (PDF)";
-            font-size: 10px;
+            content: "::: QUEBRA DE PÁGINA (Arraste para mover) :::";
+            font-size: 9px;
             font-weight: 900;
             color: #ef4444;
+            letter-spacing: 1px;
         }
 
         .manual-spacer {
-            background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #e2e8f0 10px, #e2e8f0 20px);
-            border: 1px dashed #94a3b8;
+            background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 10px, #e2e8f0 10px, #e2e8f0 20px);
+            border: 1px dashed #cbd5e1;
             resize: vertical;
             overflow: hidden;
             min-height: 20px;
@@ -192,49 +240,54 @@
         }
         
         .manual-spacer::before {
-            content: "↕ ESPAÇADOR (Arraste para ajustar)";
+            content: "::: ESPAÇADOR (Arraste) :::";
             font-size: 9px;
             font-weight: 700;
-            color: #64748b;
+            color: #94a3b8;
             pointer-events: none;
         }
 
         .add-layout-btn {
-            display: none; /* Mostrado apenas no modo ajuste */
+            display: none;
             background-color: #3b82f6;
             color: white;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: bold;
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 4px;
             margin: 4px auto;
             align-items: center;
             gap: 4px;
             cursor: pointer;
             width: fit-content;
-            opacity: 0.8;
+            opacity: 0.9;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .add-layout-btn:hover { opacity: 1; }
+        .add-layout-btn:hover { opacity: 1; transform: scale(1.02); }
 
         .layout-mode-active .add-layout-btn { display: flex; }
-        .layout-mode-active .printable-area { border: 2px solid #3b82f6; }
+        .layout-mode-active .printable-area { border: 2px solid #e2e8f0; }
 
         .delete-item-btn {
             position: absolute;
-            right: 2px;
+            right: 5px;
             top: 50%;
             transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
             background: #ef4444;
             color: white;
-            padding: 2px;
             border-radius: 4px;
             display: none;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            z-index: 20;
         }
         
         .layout-mode-active .manual-break .delete-item-btn,
         .layout-mode-active .manual-spacer .delete-item-btn {
-            display: block;
+            display: flex;
         }
 
         @media print {
@@ -248,22 +301,13 @@
             textarea, input { border: none !important; }
             .resizable-wrapper { resize: none; }
             
-            /* Renderização dos Ajustes no PDF */
             .manual-break {
-                border: none;
-                background: transparent;
-                height: 0;
-                margin: 0;
-                page-break-after: always !important;
-                page-break-inside: avoid;
+                border: none; background: transparent; height: 0; margin: 0;
+                page-break-after: always !important; page-break-inside: avoid;
             }
             .manual-break::after { display: none; }
             
-            .manual-spacer {
-                border: none;
-                background: transparent;
-                /* Altura é mantida pelo estilo inline do resize */
-            }
+            .manual-spacer { border: none; background: transparent; }
             .manual-spacer::before { display: none; }
         }
     </style>
@@ -272,7 +316,6 @@
 
     <div id="printable-dashboard" class="printable-area">
         
-        <!-- PÁGINA 1: IDENTIFICAÇÃO E RISCO -->
         <div class="content-padding p-4">
             <div class="text-center mb-3">
                 <h2 id="display-main-title" class="text-lg font-black uppercase text-red-800 tracking-tight">LAUDO TÉCNICO DE AUDITORIA</h2>
@@ -294,7 +337,6 @@
                 </div>
             </div>
 
-            <!-- Tabela de Dados Compacta -->
             <div class="mt-4">
                 <table class="header-table-grid w-full">
                     <tr>
@@ -337,7 +379,6 @@
                 </table>
             </div>
 
-            <!-- Matriz de Risco -->
             <div class="mt-4 border border-black p-3 avoid-break bg-white">
                 <div class="section-header flex items-center gap-2">
                     <i data-lucide="grid" class="w-3 h-3"></i> 1. MATRIZ DE RISCO DA AUDITORIA
@@ -356,7 +397,6 @@
             <div id="extra-break-1"></div>
         </div>
 
-        <!-- PÁGINA 2: CONTEXTO E APONTAMENTOS -->
         <div class="content-padding p-4 pt-0">
             <section class="mb-6 avoid-break">
                 <h2 class="section-header flex items-center gap-2">
@@ -394,7 +434,6 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             </section>
         </div>
 
-        <!-- PÁGINA 3: PARECER E ASSINATURAS -->
         <div class="content-padding p-4 pt-0">
             <section class="avoid-break">
                 <h2 class="section-header flex items-center gap-2">
@@ -421,13 +460,13 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         </div>
     </div>
 
-    <!-- BARRA DE FERRAMENTAS FLUTUANTE -->
+    <!-- BOTÕES DISCRETOS -->
     <div class="layout-toolbar">
-        <button onclick="toggleLayoutMode()" id="btn-toggle-layout" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded text-sm font-bold uppercase">
-            <i data-lucide="settings-2" class="w-4 h-4"></i> <span id="txt-layout-mode">Ativar Ajuste de Página</span>
+        <button onclick="toggleLayoutMode()" id="btn-toggle-layout" class="discreet-btn">
+            <i data-lucide="settings-2" class="w-4 h-4"></i> <span id="txt-layout-mode">Ajustar Layout</span>
         </button>
-        <button onclick="generatePDF()" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-1.5 rounded text-sm font-bold uppercase">
-            <i data-lucide="file-down" class="w-4 h-4"></i> Gerar PDF
+        <button onclick="generatePDF()" class="discreet-btn btn-pdf">
+            <i data-lucide="file-down" class="w-4 h-4"></i> PDF
         </button>
     </div>
 
@@ -442,12 +481,11 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         let isLayoutMode = false;
         let selectedRiskCoord = { r: 0, c: 4 };
 
-        // Dados Iniciais
+        const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
+
         let preliminarImages = [];
-        
-        // Findings agora suportam tipos: 'finding', 'break', 'spacer'
         let findings = [{
-            id: Date.now(),
+            id: generateId(),
             type: 'finding',
             proc: 'Auditoria Interna de Descontos em Vendas',
             evid: ['Análise do Ponto – Volume de Descontos por Loja\n\nA análise dos dados extraídos evidencia a concentração relevante de valores de desconto em um grupo específico de lojas e produtos.'],
@@ -457,13 +495,93 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             imgs: []
         }];
         
-        let opinions = [{ id: Date.now(), type: 'text', value: 'Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.' }];
+        let opinions = [{ id: generateId(), type: 'text', value: 'Parecer favorável à implementação imediata das travas sistêmicas conforme mapeado nos riscos financeiros.' }];
+        let extraBreaks = { afterMatrix: [], afterContext: [] };
 
-        // Ajustes Extras (entre seções estáticas)
-        let extraBreaks = {
-            afterMatrix: [], // Array de {type: 'break'|'spacer', id: ...}
-            afterContext: []
-        };
+        // --- ARRASTAR E SOLTAR (DRAG & DROP) ---
+        let dragSrcEl = null;
+        let dragSrcList = null;
+
+        function handleDragStart(e) {
+            if (!isLayoutMode) { e.preventDefault(); return false; }
+            this.style.opacity = '0.4';
+            dragSrcEl = this;
+            dragSrcList = this.parentNode.id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            this.classList.remove('drag-over');
+
+            // Verifica se está soltando na mesma lista
+            const targetListId = this.parentNode.id;
+            
+            if (dragSrcEl !== this && dragSrcList === targetListId) {
+                // Lógica de reordenação do Array
+                const srcId = dragSrcEl.getAttribute('data-id');
+                const targetId = this.getAttribute('data-id');
+                
+                let listArray;
+                if (targetListId === 'findings-list') listArray = findings;
+                else if (targetListId === 'final-opinions') listArray = opinions;
+                else if (targetListId === 'extra-break-1') listArray = extraBreaks.afterMatrix;
+                else if (targetListId === 'extra-break-2') listArray = extraBreaks.afterContext;
+
+                if (listArray) {
+                    const srcIndex = listArray.findIndex(i => i.id.toString() === srcId);
+                    const targetIndex = listArray.findIndex(i => i.id.toString() === targetId);
+
+                    if (srcIndex > -1 && targetIndex > -1) {
+                        // Move o item no array
+                        const [movedItem] = listArray.splice(srcIndex, 1);
+                        listArray.splice(targetIndex, 0, movedItem);
+                        
+                        // Re-renderiza a lista correta
+                        if (targetListId === 'findings-list') renderFindings();
+                        else if (targetListId === 'final-opinions') renderOpinions();
+                        else renderExtraBreaks();
+                    }
+                }
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            this.classList.remove('dragging');
+            document.querySelectorAll('.draggable-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+
+        function addDragEvents() {
+            if (!isLayoutMode) return;
+            
+            const items = document.querySelectorAll('.draggable-item');
+            items.forEach(item => {
+                item.setAttribute('draggable', true);
+                item.addEventListener('dragstart', handleDragStart, false);
+                item.addEventListener('dragenter', (e) => e.preventDefault(), false);
+                item.addEventListener('dragover', handleDragOver, false);
+                item.addEventListener('dragleave', handleDragLeave, false);
+                item.addEventListener('drop', handleDrop, false);
+                item.addEventListener('dragend', handleDragEnd, false);
+            });
+        }
 
         function toggleLayoutMode() {
             isLayoutMode = !isLayoutMode;
@@ -473,15 +591,14 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             const txt = document.getElementById('txt-layout-mode');
             
             if (isLayoutMode) {
-                btn.classList.replace('bg-blue-600', 'bg-slate-600');
+                btn.classList.add('btn-active');
                 txt.innerText = "Fechar Ajuste";
-                showToast("Modo de Ajuste Ativado: Use os botões azuis (+) para inserir quebras.");
+                showToast("MODO AJUSTE: Arraste os itens para reordenar.");
             } else {
-                btn.classList.replace('bg-slate-600', 'bg-blue-600');
-                txt.innerText = "Ativar Ajuste de Página";
+                btn.classList.remove('btn-active');
+                txt.innerText = "Ajustar Layout";
             }
             
-            // Re-render para mostrar botões
             renderExtraBreaks();
             renderFindings();
             renderOpinions();
@@ -509,7 +626,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         
         function addFinding() {
             findings.push({
-                id: Date.now(),
+                id: generateId(),
                 type: 'finding',
                 proc: '',
                 evid: [''],
@@ -522,8 +639,8 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         }
 
         function addLayoutItem(target, index, itemType) {
-            const newItem = { id: Date.now(), type: itemType };
-            if (itemType === 'spacer') newItem.height = 30; // Altura inicial
+            const newItem = { id: generateId(), type: itemType };
+            if (itemType === 'spacer') newItem.height = 30;
 
             if (target === 'findings') {
                 findings.splice(index + 1, 0, newItem);
@@ -560,44 +677,51 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
 
         function getLayoutButtonsHTML(target, index) {
             return `
-                <div class="flex justify-center gap-2 my-1">
+                <div class="flex justify-center gap-2 my-1 no-print">
                     <div class="add-layout-btn" onclick="addLayoutItem('${target}', ${index}, 'break')">
-                        <i data-lucide="scissors" class="w-3 h-3"></i> + Quebra
+                        <i data-lucide="scissors" class="w-3 h-3"></i> Quebra
                     </div>
                     <div class="add-layout-btn" onclick="addLayoutItem('${target}', ${index}, 'spacer')">
-                        <i data-lucide="move-vertical" class="w-3 h-3"></i> + Espaço
+                        <i data-lucide="move-vertical" class="w-3 h-3"></i> Espaço
                     </div>
                 </div>
             `;
         }
 
         function getLayoutItemHTML(item, target) {
+            const controlsHTML = `
+                <div class="delete-item-btn" onclick="removeLayoutItem('${target}', '${item.id}')" title="Remover">
+                    <i data-lucide="trash" class="w-3 h-3"></i>
+                </div>
+            `;
+            // Wrapper arrastável
+            let html = `<div class="draggable-item" data-id="${item.id}">`;
+            
             if (item.type === 'break') {
-                return `
-                    <div class="manual-break">
-                        <div class="delete-item-btn" onclick="removeLayoutItem('${target}', ${item.id})"><i data-lucide="trash" class="w-3 h-3"></i></div>
+                html += `
+                    <div class="manual-break no-print">
+                        ${controlsHTML}
                     </div>
                 `;
             } else if (item.type === 'spacer') {
-                return `
-                    <div class="manual-spacer" style="height: ${item.height || 30}px">
-                        <div class="delete-item-btn" onclick="removeLayoutItem('${target}', ${item.id})"><i data-lucide="trash" class="w-3 h-3"></i></div>
+                html += `
+                    <div class="manual-spacer no-print" style="height: ${item.height || 30}px">
+                        ${controlsHTML}
                     </div>
                 `;
             }
-            return '';
+            html += `</div>`;
+            return html;
         }
 
         function renderExtraBreaks() {
-            // Extra Break 1 (After Matrix)
             const c1 = document.getElementById('extra-break-1');
-            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; // -1 pois sempre adiciona no final
+            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; 
             extraBreaks.afterMatrix.forEach(item => {
                 html1 += getLayoutItemHTML(item, 'extra1');
             });
             c1.innerHTML = html1;
 
-            // Extra Break 2 (After Context)
             const c2 = document.getElementById('extra-break-2');
             let html2 = isLayoutMode ? getLayoutButtonsHTML('extra2', -1) : '';
             extraBreaks.afterContext.forEach(item => {
@@ -606,25 +730,23 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             c2.innerHTML = html2;
             
             lucide.createIcons();
+            addDragEvents();
         }
 
         function renderFindings() {
             const container = document.getElementById('findings-list');
             let html = '';
 
-            // Botão inicial se lista vazia ou no topo? 
-            // Simplificando: Botões sempre APÓS o item. Para inserir antes do primeiro, usamos a lógica do "After Context" (extra-break-2).
-
             findings.forEach((f, i) => {
                 if (f.type === 'break' || f.type === 'spacer') {
                     html += getLayoutItemHTML(f, 'findings');
                 } else {
-                    // Renderização Normal do Finding
                     html += `
+                    <div class="draggable-item" data-id="${f.id}">
                         <div class="border border-black bg-white overflow-hidden avoid-break relative group">
                             <div class="bg-slate-900 p-1.5 border-b border-black flex justify-between items-center">
                                 <span class="text-[9px] font-black uppercase text-white tracking-widest px-1">Apontamento</span>
-                                <button onclick="removeLayoutItem('findings', ${f.id})" class="no-print text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="removeLayoutItem('findings', '${f.id}')" class="no-print text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                             </div>
                             <div class="p-3 flex flex-col gap-3">
                                 <div>
@@ -665,7 +787,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                                         </div>
                                     `).join('')}
                                 </div>
-                                <button onclick="addImage('finding', ${f.id})" class="no-print text-[7px] font-bold bg-slate-50 border border-dashed border-slate-300 p-1">+ Foto</button>
+                                <button onclick="addImage('finding', '${f.id}')" class="no-print text-[7px] font-bold bg-slate-50 border border-dashed border-slate-300 p-1">+ Foto</button>
 
                                 <div class="flex flex-col gap-1.5 border-t border-black pt-2">
                                     <div class="flex-1 flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Plano Ação:</label><input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value"></div>
@@ -673,6 +795,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                                 </div>
                             </div>
                         </div>
+                    </div>
                     `;
                 }
 
@@ -684,6 +807,7 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             container.innerHTML = html;
             lucide.createIcons();
             initAutoResize();
+            addDragEvents();
         }
 
         function renderOpinions() {
@@ -695,13 +819,15 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                     html += getLayoutItemHTML(o, 'opinions');
                 } else {
                     html += `
+                    <div class="draggable-item" data-id="${o.id}">
                         <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start">
                             <span class="text-[9px] font-black text-slate-400 mt-1">#</span>
                             <div class="flex-1">
                                 <textarea class="dynamic-textarea" rows="1" onchange="opinions[${i}].value = this.value">${o.value}</textarea>
                             </div>
-                            <button onclick="removeLayoutItem('opinions', ${o.id})" class="no-print text-red-400 mt-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                            <button onclick="removeLayoutItem('opinions', '${o.id}')" class="no-print text-red-400 mt-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                         </div>
+                    </div>
                     `;
                 }
                 if (isLayoutMode) {
@@ -712,14 +838,14 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
             container.innerHTML = html;
             lucide.createIcons();
             initAutoResize();
+            addDragEvents();
         }
 
         function addOpinion() { 
-            opinions.push({ id: Date.now(), type: 'text', value: '' }); 
+            opinions.push({ id: generateId(), type: 'text', value: '' }); 
             renderOpinions(); 
         }
 
-        // --- MATRIZ E IMAGENS (Inalterados mas necessários para funcionamento) ---
         function renderMatrix() {
             const impactLabels = ['Mínimo', 'Leve', 'Moderado', 'Grave', 'Gravíssimo'];
             const probLabels = ['(FC) 1 M. Alto', '(FC) 0.8 Alto', '(FC) 0.6 Médio', '(FC) 0.4 Baixo', '(FC) 0.2 M. Baixo'];
@@ -807,12 +933,13 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         }
 
         async function generatePDF() {
-            // Desativa modo layout antes de gerar para limpar interface
             if (isLayoutMode) toggleLayoutMode();
 
             const originalElement = document.getElementById('printable-dashboard');
             const clone = originalElement.cloneNode(true);
             
+            clone.querySelectorAll('.no-print').forEach(el => el.remove());
+
             clone.querySelectorAll('textarea').forEach((ta, idx) => {
                 const originalTa = originalElement.querySelectorAll('textarea')[idx];
                 const div = document.createElement('div');
