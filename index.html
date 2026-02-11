@@ -55,7 +55,6 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
-        /* CABEÇALHO ATUALIZADO PARA VERMELHO MÉDIO (#7f1d1d) */
         .card-top-main {
             background-color: #7f1d1d !important; 
             color: #ffffff !important;
@@ -155,7 +154,6 @@
             pointer-events: none;
         }
 
-        /* --- BOTÕES DISCRETOS --- */
         .layout-toolbar {
             position: fixed;
             bottom: 20px;
@@ -202,7 +200,6 @@
             background-color: #fef2f2;
         }
 
-        /* --- ARRASTAR E SOLTAR --- */
         .draggable-item {
             cursor: grab;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -357,8 +354,10 @@
                     </div>
                 </div>
                 <div class="text-right flex flex-col items-end">
-                    <div class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-001</div>
-                    <p class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: --/--/----</p>
+                    <!-- Sequência Automática -->
+                    <div id="display-fr-ref" class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-289</div>
+                    <!-- Data Automática -->
+                    <p id="display-date-ref" class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: --/--/----</p>
                     <button onclick="clearData()" class="no-print mt-1.5 text-[8px] font-black bg-white text-[#7f1d1d] px-1.5 py-0.5 uppercase hover:bg-red-50 flex items-center gap-1 shadow-sm border border-[#7f1d1d]">
                         <i data-lucide="eraser" class="w-2.5 h-2.5"></i> Limpar Tudo
                     </button>
@@ -500,6 +499,7 @@
 
         let isLayoutMode = false;
         let selectedRiskCoord = { r: -1, c: -1 }; 
+        let currentSequence = 289; // Início solicitado pelo usuário
 
         const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
@@ -507,6 +507,14 @@
         let findings = []; 
         let opinions = []; 
         let extraBreaks = { afterMatrix: [], afterContext: [] };
+
+        // Função para atualizar data e referência automática
+        function updateAutoRefs() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('pt-BR');
+            document.getElementById('display-date-ref').innerText = `Ref: ${dateStr}`;
+            document.getElementById('display-fr-ref').innerText = `FR-AUD-${currentSequence}`;
+        }
 
         function handleDragStart(e) {
             if (!isLayoutMode) { e.preventDefault(); return false; }
@@ -606,13 +614,19 @@
         }
 
         function clearData() {
-            if(!confirm('Limpar laudo?')) return;
+            if(!confirm('Deseja iniciar um novo laudo? (A sequência será incrementada)')) return;
+            
+            // Incrementar sequência ao limpar (entende-se como início de novo laudo)
+            currentSequence++;
+            
             findings = []; opinions = []; extraBreaks = { afterMatrix: [], afterContext: [] }; preliminarImages = []; selectedRiskCoord = { r: -1, c: -1 };
             document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
             document.querySelectorAll('textarea').forEach(i => i.value = '');
             document.getElementById('risk-result').innerHTML = '<p class="text-[9px] font-bold text-slate-400 mb-0.5 uppercase italic">Selecione um quadrante na matriz acima</p>';
+            
+            updateAutoRefs(); // Atualiza data e número
             renderMatrix(); renderPrelimImages(); renderFindings(); renderOpinions(); renderExtraBreaks();
-            showToast("CAMPOS LIMPOS!");
+            showToast("NOVO LAUDO INICIADO!");
         }
 
         function addFinding() {
@@ -620,7 +634,6 @@
             renderFindings();
         }
 
-        // Fix: Added missing helper functions for layout rendering
         function getLayoutButtonsHTML(target, index) {
             return `
                 <div class="no-print flex justify-center gap-2 my-2">
@@ -837,7 +850,15 @@
             try { await html2pdf().set(opt).from(clone).save(); showToast("SUCESSO!"); } catch (error) { showToast("ERRO!"); }
         }
 
-        window.onload = () => { renderMatrix(); renderExtraBreaks(); renderPrelimImages(); renderFindings(); renderOpinions(); initAutoResize(); };
+        window.onload = () => { 
+            updateAutoRefs(); // Inicia com data e seq 289
+            renderMatrix(); 
+            renderExtraBreaks(); 
+            renderPrelimImages(); 
+            renderFindings(); 
+            renderOpinions(); 
+            initAutoResize(); 
+        };
     </script>
 </body>
 </html>
