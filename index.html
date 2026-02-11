@@ -359,7 +359,6 @@
                 <div class="text-right flex flex-col items-end">
                     <div class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-001</div>
                     <p class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: --/--/----</p>
-                    <!-- Botão Limpar com texto na cor das labels (#7f1d1d) -->
                     <button onclick="clearData()" class="no-print mt-1.5 text-[8px] font-black bg-white text-[#7f1d1d] px-1.5 py-0.5 uppercase hover:bg-red-50 flex items-center gap-1 shadow-sm border border-[#7f1d1d]">
                         <i data-lucide="eraser" class="w-2.5 h-2.5"></i> Limpar Tudo
                     </button>
@@ -621,13 +620,62 @@
             renderFindings();
         }
 
+        // Fix: Added missing helper functions for layout rendering
+        function getLayoutButtonsHTML(target, index) {
+            return `
+                <div class="no-print flex justify-center gap-2 my-2">
+                    <button onclick="addLayoutItem('${target}', ${index}, 'break')" class="add-layout-btn">
+                        <i data-lucide="scissors" class="w-3 h-3"></i> + Quebra
+                    </button>
+                    <button onclick="addLayoutItem('${target}', ${index}, 'spacer')" class="add-layout-btn">
+                        <i data-lucide="maximize-2" class="w-3 h-3"></i> + Espaçador
+                    </button>
+                </div>
+            `;
+        }
+
+        function getLayoutItemHTML(item, target) {
+            if (item.type === 'break') {
+                return `
+                    <div class="draggable-item manual-break" data-id="${item.id}">
+                        <button onclick="removeLayoutItem('${target}', '${item.id}')" class="delete-item-btn">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (item.type === 'spacer') {
+                return `
+                    <div class="draggable-item manual-spacer" data-id="${item.id}" style="height: ${item.height}px;" onmouseup="updateSpacerHeight('${target}', '${item.id}', this)">
+                        <button onclick="removeLayoutItem('${target}', '${item.id}')" class="delete-item-btn">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function updateSpacerHeight(target, id, el) {
+            const height = el.offsetHeight;
+            let list;
+            if (target === 'findings') list = findings;
+            else if (target === 'opinions') list = opinions;
+            else if (target === 'extra1') list = extraBreaks.afterMatrix;
+            else if (target === 'extra2') list = extraBreaks.afterContext;
+            
+            if (list) {
+                const item = list.find(i => i.id === id);
+                if (item) item.height = height;
+            }
+        }
+
         function addLayoutItem(target, index, itemType) {
             const newItem = { id: generateId(), type: itemType };
             if (itemType === 'spacer') newItem.height = 30;
             if (target === 'findings') findings.splice(index + 1, 0, newItem);
             else if (target === 'opinions') opinions.splice(index + 1, 0, newItem);
-            else if (target === 'extra1') extraBreaks.afterMatrix.push(newItem);
-            else if (target === 'extra2') extraBreaks.afterContext.push(newItem);
+            else if (target === 'extra1') extraBreaks.afterMatrix.splice(index + 1, 0, newItem);
+            else if (target === 'extra2') extraBreaks.afterContext.splice(index + 1, 0, newItem);
             renderExtraBreaks(); renderFindings(); renderOpinions();
         }
 
@@ -657,19 +705,24 @@
 
         function renderExtraBreaks() {
             const c1 = document.getElementById('extra-break-1');
-            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; extraBreaks.afterMatrix.forEach(item => html1 += getLayoutItemHTML(item, 'extra1'));
+            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; 
+            extraBreaks.afterMatrix.forEach(item => html1 += getLayoutItemHTML(item, 'extra1'));
             c1.innerHTML = html1;
+
             const c2 = document.getElementById('extra-break-2');
-            let html2 = isLayoutMode ? getLayoutButtonsHTML('extra2', -1) : ''; extraBreaks.afterContext.forEach(item => html2 += getLayoutItemHTML(item, 'extra2'));
+            let html2 = isLayoutMode ? getLayoutButtonsHTML('extra2', -1) : ''; 
+            extraBreaks.afterContext.forEach(item => html2 += getLayoutItemHTML(item, 'extra2'));
             c2.innerHTML = html2;
+
             lucide.createIcons(); addDragEvents();
         }
 
         function renderFindings() {
             const container = document.getElementById('findings-list'); let html = '';
             findings.forEach((f, i) => {
-                if (f.type === 'break' || f.type === 'spacer') html += getLayoutItemHTML(f, 'findings');
-                else {
+                if (f.type === 'break' || f.type === 'spacer') {
+                    html += getLayoutItemHTML(f, 'findings');
+                } else {
                     html += `
                     <div class="draggable-item" data-id="${f.id}">
                         <div class="avoid-break border border-black bg-white overflow-hidden relative group">
@@ -723,8 +776,9 @@
         function renderOpinions() {
             const container = document.getElementById('final-opinions'); let html = '';
             opinions.forEach((o, i) => {
-                if (o.type === 'break' || o.type === 'spacer') html += getLayoutItemHTML(o, 'opinions');
-                else {
+                if (o.type === 'break' || o.type === 'spacer') {
+                    html += getLayoutItemHTML(o, 'opinions');
+                } else {
                     html += `
                     <div class="draggable-item" data-id="${o.id}">
                         <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start list-item-separator">
