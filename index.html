@@ -21,27 +21,23 @@
         * { border-radius: 0 !important; }
 
         /* --- REGRAS CRÍTICAS DE PAGINAÇÃO --- */
-        
-        /* Bloco principal indivisível (Apontamento inteiro) */
         .avoid-break { 
             page-break-inside: avoid !important; 
             break-inside: avoid !important;
             display: block;
             position: relative; 
-            margin-bottom: 15px; /* Espaço extra para cálculo de quebra */
+            margin-bottom: 15px;
         }
 
-        /* Itens internos (linhas numeradas) indivisíveis */
         .list-item-separator {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 8px;
             margin-bottom: 8px;
-            display: flex; /* Flex ajuda o html2canvas a calcular altura */
+            display: block;
         }
         
-        /* Wrapper de cabeçalho de seção para evitar órfãs */
         .section-header-wrapper {
             page-break-after: avoid !important;
             break-after: avoid !important;
@@ -59,8 +55,9 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
+        /* CABEÇALHO ATUALIZADO PARA VERMELHO MÉDIO (#7f1d1d) */
         .card-top-main {
-            background-color: #b91c1c !important;
+            background-color: #7f1d1d !important; 
             color: #ffffff !important;
             border-bottom: 2px solid #000;
         }
@@ -309,8 +306,15 @@
             display: flex;
         }
 
+        .item-anexo-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
         @media print {
-            @page { margin: 10mm; size: A4 portrait; }
+            @page { margin: 0; size: A4 portrait; }
             body { background: white !important; padding: 0 !important; }
             .printable-area { margin: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; }
             .no-print, .layout-toolbar, .add-layout-btn, .delete-item-btn { display: none !important; }
@@ -329,7 +333,6 @@
             .manual-spacer { border: none; background: transparent; }
             .manual-spacer::before { display: none; }
             
-            /* Remove bordas de layout do modo de edição se ficarem presas */
             .printable-area { border: none !important; }
         }
     </style>
@@ -340,13 +343,13 @@
         
         <div class="content-padding p-4">
             <div class="text-center mb-3">
-                <h2 id="display-main-title" class="text-lg font-black uppercase text-red-800 tracking-tight">AUDITORIA INTERNA / DESCONTOS EM VENDAS</h2>
+                <h2 id="display-main-title" class="text-lg font-black uppercase text-red-800 tracking-tight">AUDITORIA INTERNA / LAUDO TÉCNICO</h2>
             </div>
 
             <div class="card-top-main flex justify-between items-center p-3">
                 <div class="flex items-center gap-3">
                     <div class="bg-white p-1.5 shadow-sm">
-                        <i data-lucide="file-text" class="text-red-700 w-5 h-5"></i>
+                        <i data-lucide="file-text" class="text-[#7f1d1d] w-5 h-5"></i>
                     </div>
                     <div>
                         <h1 class="text-sm font-black uppercase leading-none">Compliance & Auditoria Interna</h1>
@@ -355,8 +358,9 @@
                 </div>
                 <div class="text-right flex flex-col items-end">
                     <div class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-001</div>
-                    <p class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: 09/02/2026</p>
-                    <button onclick="clearData()" class="no-print mt-1.5 text-[8px] font-black bg-white text-red-800 px-1.5 py-0.5 uppercase hover:bg-red-50 flex items-center gap-1 shadow-sm border border-red-900">
+                    <p class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: --/--/----</p>
+                    <!-- Botão Limpar com texto na cor das labels (#7f1d1d) -->
+                    <button onclick="clearData()" class="no-print mt-1.5 text-[8px] font-black bg-white text-[#7f1d1d] px-1.5 py-0.5 uppercase hover:bg-red-50 flex items-center gap-1 shadow-sm border border-[#7f1d1d]">
                         <i data-lucide="eraser" class="w-2.5 h-2.5"></i> Limpar Tudo
                     </button>
                 </div>
@@ -366,19 +370,19 @@
                 <table class="header-table-grid w-full">
                     <tr>
                         <td class="cell-label w-28">Área Auditada:</td>
-                        <td class="cell-value" colspan="3"><input type="text" value="Comercial" id="input-area"></td>
+                        <td class="cell-value" colspan="3"><input type="text" value="" id="input-area" placeholder="..."></td>
                         <td class="cell-label w-24">Laudo Nº:</td>
-                        <td class="cell-value"><input type="text" value="289" id="input-rel" class="text-center"></td>
+                        <td class="cell-value"><input type="text" value="" id="input-rel" class="text-center" placeholder="000"></td>
                     </tr>
                     <tr>
                         <td class="cell-label">Objetivo / Escopo:</td>
                         <td class="cell-value" colspan="5">
-                            <textarea class="dynamic-textarea" id="input-obj" rows="1">Auditar a conformidade fiscal e operacional das transações com descontos superiores a 30% realizadas em 2025.</textarea>
+                            <textarea class="dynamic-textarea" id="input-obj" rows="1" placeholder="Descreva o objetivo da auditoria..."></textarea>
                         </td>
                     </tr>
                     <tr>
                         <td class="cell-label">Norma(s) de Ref:</td>
-                        <td class="cell-value" colspan="3"><input type="text" value="Pops e Politicas Internas" id="input-normas"></td>
+                        <td class="cell-value" colspan="3"><input type="text" value="" id="input-normas" placeholder="..."></td>
                         <td class="cell-label">MD Recomendada:</td>
                         <td class="cell-value">
                             <select id="input-md" class="w-full bg-transparent font-bold text-[9px] uppercase">
@@ -390,16 +394,16 @@
                     <tr>
                         <td class="cell-label">Valor Agregado:</td>
                         <td class="cell-value" colspan="1">
-                            <div class="flex items-center"><span>R$&nbsp;</span><input type="text" id="input-agreg" value="763.387,24"></div>
+                            <div class="flex items-center"><span>R$&nbsp;</span><input type="text" id="input-agreg" value="" placeholder="0,00"></div>
                         </td>
                         <td class="cell-label w-20">Notific.:</td>
-                        <td class="cell-value w-16"><input type="text" value="1" id="input-notific" class="text-center"></td>
+                        <td class="cell-value w-16"><input type="text" value="" id="input-notific" class="text-center" placeholder="0"></td>
                         <td class="cell-label w-16">NC's:</td>
-                        <td class="cell-value w-16"><input type="text" value="1" id="input-ncs" class="text-center"></td>
+                        <td class="cell-value w-16"><input type="text" value="" id="input-ncs" class="text-center" placeholder="0"></td>
                     </tr>
                     <tr>
                         <td class="cell-label">Gestor / Diretor:</td>
-                        <td class="cell-value" colspan="5"><input type="text" value="Aline Roberta / Ilton Rogerio Tarnovski" id="input-gestor"></td>
+                        <td class="cell-value" colspan="5"><input type="text" value="" id="input-gestor" placeholder="Nomes dos responsáveis..."></td>
                     </tr>
                 </table>
             </div>
@@ -413,8 +417,7 @@
                 <div class="mt-3 bg-slate-50 border border-black p-3 text-center">
                     <h4 class="text-[8px] font-black uppercase text-slate-400 mb-1">Resultado da Análise de Risco</h4>
                     <div id="risk-result">
-                        <p class="text-[9px] font-bold text-slate-700 mb-0.5 uppercase">IMPACTO: GRAVÍSSIMO | PROBABILIDADE: (M. ALTO)</p>
-                        <p class="text-[12px] font-black uppercase text-red-900 leading-none">VALOR: 95% — RISCO EXTREMO</p>
+                        <p class="text-[9px] font-bold text-slate-400 mb-0.5 uppercase italic">Selecione um quadrante na matriz acima</p>
                     </div>
                 </div>
             </div>
@@ -428,14 +431,7 @@
                     <span class="section-header"><i data-lucide="info" class="w-3 h-3 inline"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO</span>
                 </div>
                 <div class="border border-black p-2 bg-white mb-2">
-                    <textarea class="dynamic-textarea" id="input-preliminar" rows="4" placeholder="Cenário inicial...">Revisão das Políticas de Desconto
-Avaliar, em nível estratégico, a adequação dos limites máximos de desconto, critérios de exceção e níveis de alçada atualmente vigentes, considerando margem, competitividade e risco.
-
-Definição de Diretrizes e Alçadas
-Deliberar sobre a necessidade de aprovação obrigatória da Diretoria ou de instância superior para concessões acima de determinado percentual ou valor absoluto.
-
-Fortalecimento dos Controles Internos
-Determinar a implementação ou o reforço de controles sistêmicos que impeçam a aplicação de descontos acima dos limites definidos sem autorização prévia.</textarea>
+                    <textarea class="dynamic-textarea" id="input-preliminar" rows="4" placeholder="Cenário inicial, observações e contexto da auditoria..."></textarea>
                 </div>
                 
                 <div id="preliminar-images" class="flex flex-wrap gap-2 mb-2"></div>
@@ -504,67 +500,14 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         lucide.createIcons();
 
         let isLayoutMode = false;
-        let selectedRiskCoord = { r: 0, c: 4 };
+        let selectedRiskCoord = { r: -1, c: -1 }; 
 
         const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
         let preliminarImages = [];
-        let findings = [
-            {
-                id: generateId(),
-                type: 'finding',
-                proc: 'Vendas com 100% de Desconto / Bonificações',
-                evid: [
-                    'Ocorrências concentradas nas lojas Matriz, João Pessoa 4 e Teresina 3 em agosto de 2025.',
-                    'Itens de alto valor agregado com 100% de desconto tratados como venda zerada (o correto seria CFOP 5.910 - Bonificação).'
-                ],
-                nc: [
-                    'Risco iminente de autuação por ICMS e omissão de receita devido à classificação incorreta.'
-                ],
-                acao: 'Reclassificar operações e ajustar parâmetros fiscais.',
-                resp: 'Fiscal / Loja',
-                imgs: []
-            },
-            {
-                id: generateId(),
-                type: 'finding',
-                proc: 'Anomalia Operacional - Arapiraca 2',
-                evid: [
-                    'Concessão concentrada de descontos entre 52% e 54% na loja Arapiraca 2 em 02/10/2025, totalizando mais de R$ 16 mil.',
-                    'Erosão recorrente de margens (~50%) em Itabaiana e Arapiraca 2.'
-                ],
-                nc: [
-                    'Padrão incompatível com a política comercial vigente.',
-                    'Indicativo de quebra de alçada ou prática não formalizada de vendas em condições atípicas.'
-                ],
-                acao: 'Auditar alçadas e justificar descontos.',
-                resp: 'Comercial',
-                imgs: []
-            },
-            {
-                id: generateId(),
-                type: 'finding',
-                proc: 'Fragilidade em Controles Sistêmicos',
-                evid: [
-                    'Sistema permite ajustes manuais de preços a colaboradores de áreas diversas, inclusive fora de Custos e Cadastro.'
-                ],
-                nc: [
-                    'Amplitude de acessos configura fragilidade de controle, elevando risco potencial de desvios futuros.'
-                ],
-                acao: 'Restringir permissões de ajuste de preço.',
-                resp: 'TI / Sistemas',
-                imgs: []
-            }
-        ];
-        
-        let opinions = [
-            { id: generateId(), type: 'text', value: 'Recomendação de regularização fiscal imediata das operações de 100% de desconto e restrição rigorosa de acessos sistêmicos de alteração de preços.' }
-        ];
+        let findings = []; 
+        let opinions = []; 
         let extraBreaks = { afterMatrix: [], afterContext: [] };
-
-        // --- ARRASTAR E SOLTAR (DRAG & DROP) ---
-        let dragSrcEl = null;
-        let dragSrcList = null;
 
         function handleDragStart(e) {
             if (!isLayoutMode) { e.preventDefault(); return false; }
@@ -590,31 +533,21 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         function handleDrop(e) {
             if (e.stopPropagation) e.stopPropagation();
             this.classList.remove('drag-over');
-
-            // Verifica se está soltando na mesma lista
             const targetListId = this.parentNode.id;
-            
             if (dragSrcEl !== this && dragSrcList === targetListId) {
-                // Lógica de reordenação do Array
                 const srcId = dragSrcEl.getAttribute('data-id');
                 const targetId = this.getAttribute('data-id');
-                
                 let listArray;
                 if (targetListId === 'findings-list') listArray = findings;
                 else if (targetListId === 'final-opinions') listArray = opinions;
                 else if (targetListId === 'extra-break-1') listArray = extraBreaks.afterMatrix;
                 else if (targetListId === 'extra-break-2') listArray = extraBreaks.afterContext;
-
                 if (listArray) {
                     const srcIndex = listArray.findIndex(i => i.id.toString() === srcId);
                     const targetIndex = listArray.findIndex(i => i.id.toString() === targetId);
-
                     if (srcIndex > -1 && targetIndex > -1) {
-                        // Move o item no array
                         const [movedItem] = listArray.splice(srcIndex, 1);
                         listArray.splice(targetIndex, 0, movedItem);
-                        
-                        // Re-renderiza a lista correta
                         if (targetListId === 'findings-list') renderFindings();
                         else if (targetListId === 'final-opinions') renderOpinions();
                         else renderExtraBreaks();
@@ -627,14 +560,11 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         function handleDragEnd(e) {
             this.style.opacity = '1';
             this.classList.remove('dragging');
-            document.querySelectorAll('.draggable-item').forEach(item => {
-                item.classList.remove('drag-over');
-            });
+            document.querySelectorAll('.draggable-item').forEach(item => item.classList.remove('drag-over'));
         }
 
         function addDragEvents() {
             if (!isLayoutMode) return;
-            
             const items = document.querySelectorAll('.draggable-item');
             items.forEach(item => {
                 item.setAttribute('draggable', true);
@@ -650,190 +580,96 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
         function toggleLayoutMode() {
             isLayoutMode = !isLayoutMode;
             document.body.classList.toggle('layout-mode-active', isLayoutMode);
-            
             const btn = document.getElementById('btn-toggle-layout');
             const txt = document.getElementById('txt-layout-mode');
-            
             if (isLayoutMode) {
                 btn.classList.add('btn-active');
                 txt.innerText = "Fechar Ajuste";
-                showToast("MODO AJUSTE: Arraste os itens para reordenar.");
+                showToast("MODO AJUSTE ATIVO");
             } else {
                 btn.classList.remove('btn-active');
                 txt.innerText = "Ajustar Layout";
             }
-            
-            renderExtraBreaks();
-            renderFindings();
-            renderOpinions();
+            renderExtraBreaks(); renderFindings(); renderOpinions();
         }
 
         function initAutoResize() {
             document.querySelectorAll('.dynamic-textarea').forEach(textarea => {
-                const resize = () => {
-                    textarea.style.height = 'auto';
-                    textarea.style.height = (textarea.scrollHeight) + 'px';
-                };
-                textarea.addEventListener('input', resize);
-                resize();
+                const resize = () => { textarea.style.height = 'auto'; textarea.style.height = (textarea.scrollHeight) + 'px'; };
+                textarea.addEventListener('input', resize); resize();
             });
         }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toast-message').innerText = msg;
-            t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 3000);
+            t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000);
         }
 
         function clearData() {
-            if(!confirm('Tem certeza que deseja limpar todos os dados do formulário? Esta ação não pode ser desfeita.')) return;
-            
-            // Limpa inputs
-            document.getElementById('input-area').value = '';
-            document.getElementById('input-rel').value = '';
-            document.getElementById('input-obj').value = '';
-            document.getElementById('input-normas').value = '';
-            document.getElementById('input-agreg').value = '';
-            document.getElementById('input-notific').value = '';
-            document.getElementById('input-ncs').value = '';
-            document.getElementById('input-gestor').value = '';
-            document.getElementById('input-preliminar').value = '';
-            
-            // Reseta Arrays
-            preliminarImages = [];
-            findings = [];
-            opinions = []; 
-            extraBreaks = { afterMatrix: [], afterContext: [] };
-
-            // Re-renderiza tudo
-            renderPrelimImages();
-            renderFindings();
-            renderOpinions();
-            renderExtraBreaks();
-            
-            showToast("DADOS LIMPOS COM SUCESSO!");
+            if(!confirm('Limpar laudo?')) return;
+            findings = []; opinions = []; extraBreaks = { afterMatrix: [], afterContext: [] }; preliminarImages = []; selectedRiskCoord = { r: -1, c: -1 };
+            document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+            document.querySelectorAll('textarea').forEach(i => i.value = '');
+            document.getElementById('risk-result').innerHTML = '<p class="text-[9px] font-bold text-slate-400 mb-0.5 uppercase italic">Selecione um quadrante na matriz acima</p>';
+            renderMatrix(); renderPrelimImages(); renderFindings(); renderOpinions(); renderExtraBreaks();
+            showToast("CAMPOS LIMPOS!");
         }
 
-        // --- MANIPULAÇÃO DE DADOS ---
-        
         function addFinding() {
-            findings.push({
-                id: generateId(),
-                type: 'finding',
-                proc: '',
-                evid: [''],
-                nc: [''],
-                acao: '',
-                resp: '',
-                imgs: []
-            });
+            findings.push({ id: generateId(), type: 'finding', proc: '', evid: [{ text: '', imgs: [] }], nc: [{ text: '', imgs: [] }], acao: '', resp: '', imgs: [] });
             renderFindings();
         }
 
         function addLayoutItem(target, index, itemType) {
             const newItem = { id: generateId(), type: itemType };
             if (itemType === 'spacer') newItem.height = 30;
-
-            if (target === 'findings') {
-                findings.splice(index + 1, 0, newItem);
-                renderFindings();
-            } else if (target === 'opinions') {
-                opinions.splice(index + 1, 0, newItem);
-                renderOpinions();
-            } else if (target === 'extra1') {
-                extraBreaks.afterMatrix.push(newItem);
-                renderExtraBreaks();
-            } else if (target === 'extra2') {
-                extraBreaks.afterContext.push(newItem);
-                renderExtraBreaks();
-            }
+            if (target === 'findings') findings.splice(index + 1, 0, newItem);
+            else if (target === 'opinions') opinions.splice(index + 1, 0, newItem);
+            else if (target === 'extra1') extraBreaks.afterMatrix.push(newItem);
+            else if (target === 'extra2') extraBreaks.afterContext.push(newItem);
+            renderExtraBreaks(); renderFindings(); renderOpinions();
         }
 
         function removeLayoutItem(target, id) {
-            if (target === 'findings') {
-                findings = findings.filter(i => i.id !== id);
-                renderFindings();
-            } else if (target === 'opinions') {
-                opinions = opinions.filter(i => i.id !== id);
-                renderOpinions();
-            } else if (target === 'extra1') {
-                extraBreaks.afterMatrix = extraBreaks.afterMatrix.filter(i => i.id !== id);
-                renderExtraBreaks();
-            } else if (target === 'extra2') {
-                extraBreaks.afterContext = extraBreaks.afterContext.filter(i => i.id !== id);
-                renderExtraBreaks();
-            }
+            if (target === 'findings') findings = findings.filter(i => i.id !== id);
+            else if (target === 'opinions') opinions = opinions.filter(i => i.id !== id);
+            else if (target === 'extra1') extraBreaks.afterMatrix = extraBreaks.afterMatrix.filter(i => i.id !== id);
+            else if (target === 'extra2') extraBreaks.afterContext = extraBreaks.afterContext.filter(i => i.id !== id);
+            renderExtraBreaks(); renderFindings(); renderOpinions();
         }
 
-        // --- RENDERIZADORES ---
-
-        function getLayoutButtonsHTML(target, index) {
-            return `
-                <div class="flex justify-center gap-2 my-1 no-print">
-                    <div class="add-layout-btn" onclick="addLayoutItem('${target}', ${index}, 'break')">
-                        <i data-lucide="scissors" class="w-3 h-3"></i> Quebra
-                    </div>
-                    <div class="add-layout-btn" onclick="addLayoutItem('${target}', ${index}, 'spacer')">
-                        <i data-lucide="move-vertical" class="w-3 h-3"></i> Espaço
-                    </div>
-                </div>
-            `;
-        }
-
-        function getLayoutItemHTML(item, target) {
-            const controlsHTML = `
-                <div class="delete-item-btn" onclick="removeLayoutItem('${target}', '${item.id}')" title="Remover">
-                    <i data-lucide="trash" class="w-3 h-3"></i>
-                </div>
-            `;
-            // Wrapper arrastável
-            let html = `<div class="draggable-item" data-id="${item.id}">`;
-            
-            if (item.type === 'break') {
-                html += `
-                    <div class="manual-break no-print">
-                        ${controlsHTML}
-                    </div>
-                `;
-            } else if (item.type === 'spacer') {
-                html += `
-                    <div class="manual-spacer no-print" style="height: ${item.height || 30}px">
-                        ${controlsHTML}
-                    </div>
-                `;
-            }
-            html += `</div>`;
-            return html;
+        function addImage(target, findingId = null, listType = null, itemIndex = null) {
+            const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0]; const reader = new FileReader();
+                reader.onload = () => {
+                    if (target === 'preliminar') { preliminarImages.push(reader.result); renderPrelimImages(); }
+                    else if (target === 'finding-item') {
+                        const f = findings.find(x => x.id === findingId);
+                        if (f && f[listType][itemIndex]) { f[listType][itemIndex].imgs.push(reader.result); renderFindings(); }
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
         }
 
         function renderExtraBreaks() {
             const c1 = document.getElementById('extra-break-1');
-            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; 
-            extraBreaks.afterMatrix.forEach(item => {
-                html1 += getLayoutItemHTML(item, 'extra1');
-            });
+            let html1 = isLayoutMode ? getLayoutButtonsHTML('extra1', -1) : ''; extraBreaks.afterMatrix.forEach(item => html1 += getLayoutItemHTML(item, 'extra1'));
             c1.innerHTML = html1;
-
             const c2 = document.getElementById('extra-break-2');
-            let html2 = isLayoutMode ? getLayoutButtonsHTML('extra2', -1) : '';
-            extraBreaks.afterContext.forEach(item => {
-                html2 += getLayoutItemHTML(item, 'extra2');
-            });
+            let html2 = isLayoutMode ? getLayoutButtonsHTML('extra2', -1) : ''; extraBreaks.afterContext.forEach(item => html2 += getLayoutItemHTML(item, 'extra2'));
             c2.innerHTML = html2;
-            
-            lucide.createIcons();
-            addDragEvents();
+            lucide.createIcons(); addDragEvents();
         }
 
         function renderFindings() {
-            const container = document.getElementById('findings-list');
-            let html = '';
-
+            const container = document.getElementById('findings-list'); let html = '';
             findings.forEach((f, i) => {
-                if (f.type === 'break' || f.type === 'spacer') {
-                    html += getLayoutItemHTML(f, 'findings');
-                } else {
+                if (f.type === 'break' || f.type === 'spacer') html += getLayoutItemHTML(f, 'findings');
+                else {
                     html += `
                     <div class="draggable-item" data-id="${f.id}">
                         <div class="avoid-break border border-black bg-white overflow-hidden relative group">
@@ -842,258 +678,112 @@ Determinar a implementação ou o reforço de controles sistêmicos que impeçam
                                 <button onclick="removeLayoutItem('findings', '${f.id}')" class="no-print text-red-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
                             </div>
                             <div class="p-3 flex flex-col gap-3">
-                                <div>
-                                    <label class="text-[7px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Objeto do Exame</label>
-                                    <div class="border border-black p-1 bg-slate-50">
-                                        <input type="text" value="${f.proc}" onchange="findings[${i}].proc = this.value; document.getElementById('display-main-title').innerText = this.value.toUpperCase()">
-                                    </div>
-                                </div>
+                                <input type="text" class="border border-black p-1 bg-slate-50 font-bold text-[9px] uppercase" value="${f.proc}" placeholder="OBJETO DO EXAME..." onchange="findings[${i}].proc = this.value">
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="paperclip" class="w-2.5 h-2.5"></i> Evidências</h4>
                                     ${f.evid.map((e, ei) => `
-                                        <div class="flex gap-2 items-start list-item-separator">
-                                            <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ei+1}]</span>
-                                            <div class="flex-1">
-                                                <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].evid[${ei}] = this.value">${e}</textarea>
+                                        <div class="list-item-separator">
+                                            <div class="flex gap-2 items-start">
+                                                <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ei+1}]</span>
+                                                <textarea class="dynamic-textarea flex-1" onchange="findings[${i}].evid[${ei}].text = this.value" placeholder="Fato...">${e.text}</textarea>
+                                                <button onclick="findings[${i}].evid.splice(${ei}, 1); renderFindings()" class="no-print text-red-300"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                                             </div>
-                                            <button onclick="findings[${i}].evid.splice(${ei}, 1); renderFindings()" class="no-print text-red-300 mt-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                            <div class="item-anexo-gallery">${e.imgs.map((img, imi) => `<div class="resizable-wrapper" style="width: 80px; height: 80px;"><img src="${img}"><button onclick="findings[${i}].evid[${ei}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5"><i data-lucide="trash-2" class="w-2 h-2"></i></button></div>`).join('')}</div>
+                                            <button onclick="addImage('finding-item', '${f.id}', 'evid', ${ei})" class="no-print mt-1 text-[7px] font-black text-red-700 uppercase opacity-60">+ Anexo</button>
                                         </div>`).join('')}
-                                    <button onclick="findings[${i}].evid.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Fato</button>
+                                    <button onclick="findings[${i}].evid.push({text: '', imgs: []}); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase mt-1">+ Fato</button>
                                 </div>
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Conformidades</h4>
                                     ${f.nc.map((n, ni) => `
-                                        <div class="flex gap-2 items-start list-item-separator">
-                                            <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ni+1}]</span>
-                                            <div class="flex-1">
-                                                <textarea class="dynamic-textarea" rows="1" onchange="findings[${i}].nc[${ni}] = this.value">${n}</textarea>
+                                        <div class="list-item-separator">
+                                            <div class="flex gap-2 items-start">
+                                                <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ni+1}]</span>
+                                                <textarea class="dynamic-textarea flex-1" onchange="findings[${i}].nc[${ni}].text = this.value" placeholder="Desvio...">${n.text}</textarea>
+                                                <button onclick="findings[${i}].nc.splice(${ni}, 1); renderFindings()" class="no-print text-red-300"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                                             </div>
-                                            <button onclick="findings[${i}].nc.splice(${ni}, 1); renderFindings()" class="no-print text-red-300 mt-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                            <div class="item-anexo-gallery">${n.imgs.map((img, imi) => `<div class="resizable-wrapper" style="width: 80px; height: 80px;"><img src="${img}"><button onclick="findings[${i}].nc[${ni}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5"><i data-lucide="trash-2" class="w-2 h-2"></i></button></div>`).join('')}</div>
+                                            <button onclick="addImage('finding-item', '${f.id}', 'nc', ${ni})" class="no-print mt-1 text-[7px] font-black text-red-700 uppercase opacity-60">+ Anexo</button>
                                         </div>`).join('')}
-                                    <button onclick="findings[${i}].nc.push(''); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase tracking-tighter mt-1">+ Desvio</button>
+                                    <button onclick="findings[${i}].nc.push({text: '', imgs: []}); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase mt-1">+ Desvio</button>
                                 </div>
-                                <div class="flex flex-wrap gap-2">
-                                    ${f.imgs.map((img, imi) => `
-                                        <div class="resizable-wrapper" style="width: 24%; height: 120px;">
-                                            <img src="${img}">
-                                            <button onclick="findings[${i}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5 z-20"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <button onclick="addImage('finding', '${f.id}')" class="no-print text-[7px] font-bold bg-slate-50 border border-dashed border-slate-300 p-1">+ Foto</button>
-
-                                <div class="flex flex-col gap-1.5 border-t border-black pt-2">
-                                    <div class="flex-1 flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Plano Ação:</label><input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value"></div>
-                                    <div class="w-full flex items-center border border-black p-1.5 bg-green-50/20"><label class="text-[7px] font-black uppercase tracking-widest mr-2 whitespace-nowrap">Responsável:</label><input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value"></div>
+                                <div class="grid grid-cols-2 gap-2 border-t border-black pt-2">
+                                    <input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value" placeholder="PLANO AÇÃO" class="border border-black p-1 text-[8px] bg-green-50/20">
+                                    <input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value" placeholder="RESPONSÁVEL" class="border border-black p-1 text-[8px] bg-green-50/20">
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    `;
+                    </div>`;
                 }
-
-                if (isLayoutMode) {
-                    html += getLayoutButtonsHTML('findings', i);
-                }
+                if (isLayoutMode) html += getLayoutButtonsHTML('findings', i);
             });
-
-            container.innerHTML = html;
-            lucide.createIcons();
-            initAutoResize();
-            addDragEvents();
+            container.innerHTML = html; lucide.createIcons(); initAutoResize(); addDragEvents();
         }
 
         function renderOpinions() {
-            const container = document.getElementById('final-opinions');
-            let html = '';
-
+            const container = document.getElementById('final-opinions'); let html = '';
             opinions.forEach((o, i) => {
-                if (o.type === 'break' || o.type === 'spacer') {
-                    html += getLayoutItemHTML(o, 'opinions');
-                } else {
+                if (o.type === 'break' || o.type === 'spacer') html += getLayoutItemHTML(o, 'opinions');
+                else {
                     html += `
                     <div class="draggable-item" data-id="${o.id}">
                         <div class="flex gap-2 border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 items-start list-item-separator">
                             <span class="text-[9px] font-black text-slate-400 mt-1">#</span>
-                            <div class="flex-1">
-                                <textarea class="dynamic-textarea" rows="1" onchange="opinions[${i}].value = this.value">${o.value}</textarea>
-                            </div>
+                            <textarea class="dynamic-textarea flex-1" onchange="opinions[${i}].value = this.value" placeholder="Parecer...">${o.value}</textarea>
                             <button onclick="removeLayoutItem('opinions', '${o.id}')" class="no-print text-red-400 mt-1"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                         </div>
-                    </div>
-                    `;
+                    </div>`;
                 }
-                if (isLayoutMode) {
-                    html += getLayoutButtonsHTML('opinions', i);
-                }
+                if (isLayoutMode) html += getLayoutButtonsHTML('opinions', i);
             });
-
-            container.innerHTML = html;
-            lucide.createIcons();
-            initAutoResize();
-            addDragEvents();
+            container.innerHTML = html; lucide.createIcons(); initAutoResize(); addDragEvents();
         }
 
-        function addOpinion() { 
-            opinions.push({ id: generateId(), type: 'text', value: '' }); 
-            renderOpinions(); 
-        }
+        function addOpinion() { opinions.push({ id: generateId(), type: 'text', value: '' }); renderOpinions(); }
 
         function renderMatrix() {
             const impactLabels = ['Mínimo', 'Leve', 'Moderado', 'Grave', 'Gravíssimo'];
             const probLabels = ['(FC) 1 M. Alto', '(FC) 0.8 Alto', '(FC) 0.6 Médio', '(FC) 0.4 Baixo', '(FC) 0.2 M. Baixo'];
-            const levels = [
-                ['MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO', 'EXTREMO'],
-                ['MODERADO', 'ELEVADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],
-                ['BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],
-                ['BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO'],
-                ['BAIXO', 'BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO']
-            ];
-            const colors = [
-                ['bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600', 'bg-red-700'],
-                ['bg-emerald-600', 'bg-yellow-400', 'bg-yellow-400', 'bg-red-600', 'bg-red-700'],
-                ['bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600'],
-                ['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600'],
-                ['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400']
-            ];
+            const levels = [['MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO', 'EXTREMO'],['MODERADO', 'ELEVADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],['BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO', 'EXTREMO'],['BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO', 'EXTREMO'],['BAIXO', 'BAIXO', 'BAIXO', 'MODERADO', 'ELEVADO']];
+            const colors = [['bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600', 'bg-red-700'],['bg-emerald-600', 'bg-yellow-400', 'bg-yellow-400', 'bg-red-600', 'bg-red-700'],['bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600', 'bg-red-600'],['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400', 'bg-red-600'],['bg-emerald-500', 'bg-emerald-500', 'bg-emerald-500', 'bg-emerald-600', 'bg-yellow-400']];
             const values = [['10%','30%','50%','75%','95%'],['8%','24%','40%','60%','76%'],['6%','18%','30%','45%','57%'],['4%','12%','20%','30%','38%'],['2%','6%','10%','15%','19%']];
-
             let html = `<table class="w-full border-collapse border border-gray-300"><thead><tr><th class="border border-gray-300"></th>`;
-            impactLabels.forEach(l => html += `<th class="border border-gray-300 bg-gray-50 p-1 text-[7px] font-black uppercase tracking-tighter">${l}</th>`);
+            impactLabels.forEach(l => html += `<th class="border border-gray-300 bg-gray-50 p-1 text-[7px] font-black uppercase">${l}</th>`);
             html += `</tr></thead><tbody>`;
-
             probLabels.forEach((p, r) => {
                 html += `<tr><td class="border border-gray-300 bg-gray-50 p-1 text-[7px] font-bold text-center leading-none">${p}</td>`;
                 levels[r].forEach((lvl, c) => {
-                    const color = colors[r][c];
-                    const isSelected = selectedRiskCoord.r === r && selectedRiskCoord.c === c;
-                    html += `<td class="border border-gray-300 p-0.5">
-                        <button onclick="selectRisk(${r}, ${c}, '${values[r][c]}', '${lvl}', '${impactLabels[c]}', '${p}')" 
-                                class="w-full h-9 flex flex-col justify-center items-center ${color} transition-all ${isSelected ? 'risk-btn-selected' : 'hover:opacity-80'}">
-                            <span class="text-[6px] font-black ${color.includes('yellow') ? 'text-gray-800' : 'text-white'} leading-none">${lvl}</span>
-                            <span class="text-[8px] font-black ${color.includes('yellow') ? 'text-gray-900' : 'text-white'} leading-none">${values[r][c]}</span>
-                        </button>
-                    </td>`;
-                });
-                html += `</tr>`;
-            });
-            html += `</tbody></table>`;
+                    const color = colors[r][c]; const isSelected = selectedRiskCoord.r === r && selectedRiskCoord.c === c;
+                    html += `<td class="border border-gray-300 p-0.5"><button onclick="selectRisk(${r}, ${c}, '${values[r][c]}', '${lvl}', '${impactLabels[c]}', '${p}')" class="w-full h-9 flex flex-col justify-center items-center ${color} transition-all ${isSelected ? 'risk-btn-selected' : 'hover:opacity-80'}"><span class="text-[6px] font-black ${color.includes('yellow') ? 'text-gray-800' : 'text-white'} leading-none">${lvl}</span><span class="text-[8px] font-black ${color.includes('yellow') ? 'text-gray-900' : 'text-white'} leading-none">${values[r][c]}</span></button></td>`;
+                }); html += `</tr>`;
+            }); html += `</tbody></table>`;
             document.getElementById('risk-matrix-container').innerHTML = html;
         }
 
         function selectRisk(r, c, val, lvl, imp, prob) {
-            selectedRiskCoord = { r, c };
-            renderMatrix();
-            document.getElementById('risk-result').innerHTML = `
-                <p class="text-[9px] font-bold text-slate-700 mb-0.5 uppercase">IMPACTO: ${imp.toUpperCase()} | PROBABILIDADE: ${prob.toUpperCase()}</p>
-                <p class="text-[12px] font-black uppercase text-red-900 leading-none">VALOR: ${val} — ${lvl}</p>
-            `;
-        }
-
-        function addImage(type, findingId = null) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = () => {
-                    if (type === 'preliminar') {
-                        preliminarImages.push(reader.result);
-                        renderPrelimImages();
-                    } else {
-                        const f = findings.find(x => x.id === findingId);
-                        f.imgs.push(reader.result);
-                        renderFindings();
-                    }
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
+            selectedRiskCoord = { r, c }; renderMatrix();
+            document.getElementById('risk-result').innerHTML = `<p class="text-[9px] font-bold text-slate-700 mb-0.5 uppercase">IMPACTO: ${imp.toUpperCase()} | PROBABILIDADE: ${prob.toUpperCase()}</p><p class="text-[12px] font-black uppercase text-red-900 leading-none">VALOR: ${val} — ${lvl}</p>`;
         }
 
         function renderPrelimImages() {
             const container = document.getElementById('preliminar-images');
-            container.innerHTML = preliminarImages.map((img, i) => `
-                <div class="resizable-wrapper bg-white shadow-sm" style="width: 32%; height: 200px;">
-                    <img src="${img}">
-                    <button onclick="preliminarImages.splice(${i}, 1); renderPrelimImages()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-1 hover:bg-red-800 z-20">
-                        <i data-lucide="trash-2" class="w-3 h-3"></i>
-                    </button>
-                </div>
-            `).join('');
+            container.innerHTML = preliminarImages.map((img, i) => `<div class="resizable-wrapper bg-white shadow-sm" style="width: 32%; height: 200px;"><img src="${img}"><button onclick="preliminarImages.splice(${i}, 1); renderPrelimImages()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-1 z-20"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div>`).join('');
             lucide.createIcons();
         }
 
         async function generatePDF() {
             if (isLayoutMode) toggleLayoutMode();
-
-            const originalElement = document.getElementById('printable-dashboard');
-            const clone = originalElement.cloneNode(true);
-            
+            const originalElement = document.getElementById('printable-dashboard'); const clone = originalElement.cloneNode(true);
             clone.querySelectorAll('.no-print').forEach(el => el.remove());
-
-            clone.querySelectorAll('textarea').forEach((ta, idx) => {
-                const originalTa = originalElement.querySelectorAll('textarea')[idx];
-                const div = document.createElement('div');
-                div.className = 'pdf-static-text';
-                div.textContent = originalTa.value;
-                ta.parentNode.replaceChild(div, ta);
-            });
-
-            clone.querySelectorAll('input[type="text"]').forEach((inp, idx) => {
-                const originalInp = originalElement.querySelectorAll('input[type="text"]')[idx];
-                const span = document.createElement('span');
-                span.className = 'pdf-static-text';
-                span.textContent = originalInp.value;
-                inp.parentNode.replaceChild(span, inp);
-            });
-
-            clone.querySelectorAll('select').forEach((sel, idx) => {
-                const originalSel = originalElement.querySelectorAll('select')[idx];
-                const span = document.createElement('span');
-                span.className = 'pdf-static-text text-center block w-full uppercase';
-                span.textContent = originalSel.value;
-                sel.parentNode.replaceChild(span, sel);
-            });
-
-            const opt = {
-                // Margens (Top, Left, Bottom, Right) em mm
-                // 30mm na margem inferior para evitar cortes
-                margin: [10, 10, 30, 10], 
-                filename: `Laudo_Auditoria_${document.getElementById('input-rel').value}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, // Escala 2 é ideal para manter qualidade sem pesar
-                    useCORS: true, 
-                    letterRendering: true, // Importante para renderização de fontes
-                    scrollY: 0
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { 
-                    mode: ['css', 'legacy'], 
-                    // Lista rigorosa de seletores para evitar quebra
-                    avoid: ['.avoid-break', '.list-item-separator', '.section-header-wrapper'] 
-                }
-            };
-
-            showToast("PROCESSANDO LAUDO OFICIAL...");
-            try {
-                await html2pdf().set(opt).from(clone).save();
-                showToast("PDF GERADO COM SUCESSO!");
-            } catch (error) {
-                showToast("ERRO NA GERAÇÃO.");
-            }
+            clone.querySelectorAll('textarea').forEach((ta, idx) => { const originalTa = originalElement.querySelectorAll('textarea')[idx]; const div = document.createElement('div'); div.className = 'pdf-static-text'; div.textContent = originalTa.value; ta.parentNode.replaceChild(div, ta); });
+            clone.querySelectorAll('input[type="text"]').forEach((inp, idx) => { const originalInp = originalElement.querySelectorAll('input[type="text"]')[idx]; const span = document.createElement('span'); span.className = 'pdf-static-text'; span.textContent = originalInp.value; inp.parentNode.replaceChild(span, inp); });
+            clone.querySelectorAll('select').forEach((sel, idx) => { const originalSel = originalElement.querySelectorAll('select')[idx]; const span = document.createElement('span'); span.className = 'pdf-static-text text-center block w-full uppercase'; span.textContent = originalSel.value; sel.parentNode.replaceChild(span, sel); });
+            const opt = { margin: [10, 10, 30, 10], filename: `Laudo_Auditoria_${document.getElementById('input-rel').value || 'S_N'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid-break', '.list-item-separator', '.section-header-wrapper'] } };
+            showToast("GERANDO PDF...");
+            try { await html2pdf().set(opt).from(clone).save(); showToast("SUCESSO!"); } catch (error) { showToast("ERRO!"); }
         }
 
-        window.onload = () => {
-            renderMatrix();
-            renderExtraBreaks();
-            renderPrelimImages();
-            renderFindings();
-            renderOpinions();
-            initAutoResize();
-        };
+        window.onload = () => { renderMatrix(); renderExtraBreaks(); renderPrelimImages(); renderFindings(); renderOpinions(); initAutoResize(); };
     </script>
 </body>
 </html>
