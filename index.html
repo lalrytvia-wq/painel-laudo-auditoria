@@ -396,14 +396,24 @@
             textarea, input { border: none !important; }
             .resizable-wrapper { resize: none; }
             
+            /* CSS Nativo para Impressão */
             .manual-break {
-                border: none; background: transparent; height: 0; margin: 0;
-                page-break-after: always !important; page-break-inside: avoid;
+                border: none !important; 
+                background: none !important; 
+                height: 0 !important; 
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-after: always !important; 
+                display: block !important;
+                visibility: hidden !important;
             }
-            .manual-break::after { display: none; }
+            .manual-break::after { content: none !important; display: none !important; }
             
-            .manual-spacer { border: none; background: transparent; }
-            .manual-spacer::before { display: none; }
+            .manual-spacer { 
+                border: none !important; 
+                background: none !important; 
+            }
+            .manual-spacer::before { content: none !important; display: none !important; }
             
             .printable-area { border: none !important; }
             .rich-editor { border: none !important; padding: 0 !important; }
@@ -503,7 +513,6 @@
                     <span class="section-header"><i data-lucide="info" class="w-3 h-3 inline"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO</span>
                 </div>
                 <div class="mb-2">
-                    <!-- Ferramentas de Edição -->
                     <div class="no-print editor-tools">
                         <button onmousedown="event.preventDefault(); formatDoc('bold')" class="tool-btn" title="Negrito">B</button>
                         <div class="color-picker-wrapper tool-btn" title="Cor da Fonte">
@@ -591,7 +600,6 @@
         let opinions = []; 
         let extraBreaks = { afterMatrix: [], afterContext: [] };
 
-        // Função de formatação robusta que mantém a seleção
         function formatDoc(cmd, value = null) {
             document.execCommand(cmd, false, value);
         }
@@ -605,74 +613,6 @@
             const dateStr = today.toLocaleDateString('pt-BR');
             document.getElementById('display-date-ref').innerText = `Ref: ${dateStr}`;
             document.getElementById('display-fr-ref').innerText = `FR-AUD-${currentSequence}`;
-        }
-
-        function handleDragStart(e) {
-            if (!isLayoutMode) { e.preventDefault(); return false; }
-            this.style.opacity = '0.4';
-            dragSrcEl = this;
-            dragSrcList = this.parentNode.id;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
-            this.classList.add('dragging');
-        }
-
-        function handleDragOver(e) {
-            if (e.preventDefault) e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            this.classList.add('drag-over');
-            return false;
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            this.classList.remove('drag-over');
-            const targetListId = this.parentNode.id;
-            if (dragSrcEl !== this && dragSrcList === targetListId) {
-                const srcId = dragSrcEl.getAttribute('data-id');
-                const targetId = this.getAttribute('data-id');
-                let listArray;
-                if (targetListId === 'findings-list') listArray = findings;
-                else if (targetListId === 'final-opinions') listArray = opinions;
-                else if (targetListId === 'extra-break-1') listArray = extraBreaks.afterMatrix;
-                else if (targetListId === 'extra-break-2') listArray = extraBreaks.afterContext;
-                if (listArray) {
-                    const srcIndex = listArray.findIndex(i => i.id.toString() === srcId);
-                    const targetIndex = listArray.findIndex(i => i.id.toString() === targetId);
-                    if (srcIndex > -1 && targetIndex > -1) {
-                        const [movedItem] = listArray.splice(srcIndex, 1);
-                        listArray.splice(targetIndex, 0, movedItem);
-                        if (targetListId === 'findings-list') renderFindings();
-                        else if (targetListId === 'final-opinions') renderOpinions();
-                        else renderExtraBreaks();
-                    }
-                }
-            }
-            return false;
-        }
-
-        function handleDragEnd(e) {
-            this.style.opacity = '1';
-            this.classList.remove('dragging');
-            document.querySelectorAll('.draggable-item').forEach(item => item.classList.remove('drag-over'));
-        }
-
-        function addDragEvents() {
-            if (!isLayoutMode) return;
-            const items = document.querySelectorAll('.draggable-item');
-            items.forEach(item => {
-                item.setAttribute('draggable', true);
-                item.addEventListener('dragstart', handleDragStart, false);
-                item.addEventListener('dragenter', (e) => e.preventDefault(), false);
-                item.addEventListener('dragover', handleDragOver, false);
-                item.addEventListener('dragleave', handleDragLeave, false);
-                item.addEventListener('drop', handleDrop, false);
-                item.addEventListener('dragend', handleDragEnd, false);
-            });
         }
 
         function toggleLayoutMode() {
@@ -738,14 +678,11 @@
             if (item.type === 'break') {
                 return `
                     <div class="draggable-item manual-break" data-id="${item.id}">
-                        <button onclick="removeLayoutItem('${target}', '${item.id}')" class="delete-item-btn">
-                            <i data-lucide="trash-2" class="w-3 h-3"></i>
-                        </button>
                     </div>
                 `;
             } else if (item.type === 'spacer') {
                 return `
-                    <div class="draggable-item manual-spacer" data-id="${item.id}" style="height: ${item.height}px;" onmouseup="updateSpacerHeight('${target}', '${item.id}', this)">
+                    <div class="draggable-item manual-spacer" data-id="${item.id}" style="height: ${item.height}px;">
                         <button onclick="removeLayoutItem('${target}', '${item.id}')" class="delete-item-btn">
                             <i data-lucide="trash-2" class="w-3 h-3"></i>
                         </button>
@@ -753,19 +690,6 @@
                 `;
             }
             return '';
-        }
-
-        function updateSpacerHeight(target, id, el) {
-            const height = el.offsetHeight;
-            let list;
-            if (target === 'findings') list = findings;
-            else if (target === 'opinions') list = opinions;
-            else if (target === 'extra1') list = extraBreaks.afterMatrix;
-            else if (target === 'extra2') list = extraBreaks.afterContext;
-            if (list) {
-                const item = list.find(i => i.id === id);
-                if (item) item.height = height;
-            }
         }
 
         function addLayoutItem(target, index, itemType) {
@@ -781,8 +705,8 @@
         function removeLayoutItem(target, id) {
             if (target === 'findings') findings = findings.filter(i => i.id !== id);
             else if (target === 'opinions') opinions = opinions.filter(i => i.id !== id);
-            else if (target === 'extra1') extraBreaks.afterMatrix.splice(index, 1);
-            else if (target === 'extra2') extraBreaks.afterContext.splice(index, 1);
+            else if (target === 'extra1') extraBreaks.afterMatrix = extraBreaks.afterMatrix.filter(i => i.id !== id);
+            else if (target === 'extra2') extraBreaks.afterContext = extraBreaks.afterContext.filter(i => i.id !== id);
             renderExtraBreaks(); renderFindings(); renderOpinions();
         }
 
@@ -813,10 +737,9 @@
             extraBreaks.afterContext.forEach(item => html2 += getLayoutItemHTML(item, 'extra2'));
             c2.innerHTML = html2;
 
-            lucide.createIcons(); addDragEvents();
+            lucide.createIcons();
         }
 
-        // Helper para gerar o HTML do toolbar rico
         function getRichToolbarHTML() {
             return `
                 <div class="no-print editor-tools">
@@ -844,10 +767,8 @@
                             </div>
                             <div class="p-3 flex flex-col gap-3">
                                 <input type="text" class="border border-black p-1 bg-slate-50 font-bold text-[9px] uppercase" value="${f.proc}" placeholder="OBJETO DO EXAME..." onchange="findings[${i}].proc = this.value">
-                                
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="paperclip" class="w-2.5 h-2.5"></i> Evidências</h4>
-                                    
                                     ${f.evid.map((e, ei) => `
                                         <div class="list-item-separator">
                                             ${getRichToolbarHTML()}
@@ -861,10 +782,8 @@
                                         </div>`).join('')}
                                     <button onclick="findings[${i}].evid.push({text: '', imgs: []}); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase mt-1">+ Fato</button>
                                 </div>
-
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Conformidades</h4>
-                                    
                                     ${f.nc.map((n, ni) => `
                                         <div class="list-item-separator">
                                             ${getRichToolbarHTML()}
@@ -878,7 +797,6 @@
                                         </div>`).join('')}
                                     <button onclick="findings[${i}].nc.push({text: '', imgs: []}); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase mt-1">+ Desvio</button>
                                 </div>
-
                                 <div class="grid grid-cols-2 gap-2 border-t border-black pt-2">
                                     <input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value" placeholder="PLANO AÇÃO" class="border border-black p-1 text-[8px] bg-green-50/20">
                                     <input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value" placeholder="RESPONSÁVEL" class="border border-black p-1 text-[8px] bg-green-50/20">
@@ -889,7 +807,7 @@
                 }
                 if (isLayoutMode) html += getLayoutButtonsHTML('findings', i);
             });
-            container.innerHTML = html; lucide.createIcons(); initAutoResize(); addDragEvents();
+            container.innerHTML = html; lucide.createIcons(); initAutoResize();
         }
 
         function renderOpinions() {
@@ -909,7 +827,7 @@
                 }
                 if (isLayoutMode) html += getLayoutButtonsHTML('opinions', i);
             });
-            container.innerHTML = html; lucide.createIcons(); initAutoResize(); addDragEvents();
+            container.innerHTML = html; lucide.createIcons(); initAutoResize();
         }
 
         function addOpinion() { opinions.push({ id: generateId(), type: 'text', value: '' }); renderOpinions(); }
@@ -946,13 +864,35 @@
 
         async function generatePDF() {
             if (isLayoutMode) toggleLayoutMode();
-            const originalElement = document.getElementById('printable-dashboard'); const clone = originalElement.cloneNode(true);
-            clone.querySelectorAll('.no-print').forEach(el => el.remove());
+            const originalElement = document.getElementById('printable-dashboard'); 
+            const clone = originalElement.cloneNode(true);
             
-            // Tratar áreas de texto estático no PDF
-            clone.querySelectorAll('textarea').forEach((ta, idx) => { const originalTa = originalElement.querySelectorAll('textarea')[idx]; const div = document.createElement('div'); div.className = 'pdf-static-text'; div.textContent = originalTa.value; ta.parentNode.replaceChild(div, ta); });
+            // 1. Remover elementos desnecessários
+            clone.querySelectorAll('.no-print, .editor-tools, .add-layout-btn, .delete-item-btn').forEach(el => el.remove());
             
-            // Tratar Rich Text Editors (contenteditable) - Mantém HTML para negrito e cor
+            // 2. Limpar agressivamente os estilos de quebras e espaçadores no clone
+            clone.querySelectorAll('.manual-break').forEach(el => {
+                // Remove a classe para garantir que o CSS não a encontre
+                el.className = ''; 
+                // Define estilos de quebra limpos e invisíveis
+                el.style.cssText = "border: 0 !important; border-top: 0 !important; margin: 0 !important; padding: 0 !important; height: 0 !important; background: none !important; page-break-after: always !important; display: block !important; outline: none !important; box-shadow: none !important; visibility: hidden !important;";
+                el.innerHTML = ''; 
+            });
+
+            clone.querySelectorAll('.manual-spacer').forEach(el => {
+                el.style.cssText = "border: 0 !important; border-top: 0 !important; margin: 0 !important; padding: 0 !important; background: none !important; outline: none !important; box-shadow: none !important; overflow: hidden !important;";
+                el.innerHTML = ''; 
+            });
+            
+            // 3. Converter entradas em texto estático
+            clone.querySelectorAll('textarea').forEach((ta, idx) => { 
+                const originalTa = originalElement.querySelectorAll('textarea')[idx]; 
+                const div = document.createElement('div'); 
+                div.className = 'pdf-static-text'; 
+                div.textContent = originalTa.value; 
+                ta.parentNode.replaceChild(div, ta); 
+            });
+            
             clone.querySelectorAll('.rich-editor').forEach((re, idx) => {
                 const originalRe = originalElement.querySelectorAll('.rich-editor')[idx];
                 const div = document.createElement('div');
@@ -961,12 +901,45 @@
                 re.parentNode.replaceChild(div, re);
             });
 
-            clone.querySelectorAll('input[type="text"]').forEach((inp, idx) => { const originalInp = originalElement.querySelectorAll('input[type="text"]')[idx]; const span = document.createElement('span'); span.className = 'pdf-static-text'; span.textContent = originalInp.value; inp.parentNode.replaceChild(span, inp); });
-            clone.querySelectorAll('select').forEach((sel, idx) => { const originalSel = originalElement.querySelectorAll('select')[idx]; const span = document.createElement('span'); span.className = 'pdf-static-text text-center block w-full uppercase'; span.textContent = originalSel.value; sel.parentNode.replaceChild(span, sel); });
+            clone.querySelectorAll('input[type="text"]').forEach((inp, idx) => { 
+                const originalInp = originalElement.querySelectorAll('input[type="text"]')[idx]; 
+                const span = document.createElement('span'); 
+                span.className = 'pdf-static-text'; 
+                span.textContent = originalInp.value; 
+                inp.parentNode.replaceChild(span, inp); 
+            });
+
+            clone.querySelectorAll('select').forEach((sel, idx) => { 
+                const originalSel = originalElement.querySelectorAll('select')[idx]; 
+                const span = document.createElement('span'); 
+                span.className = 'pdf-static-text text-center block w-full uppercase'; 
+                span.textContent = originalSel.value; 
+                sel.parentNode.replaceChild(span, sel); 
+            });
             
-            const opt = { margin: [10, 10, 30, 10], filename: `Laudo_Auditoria_${document.getElementById('input-rel').value || 'S_N'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid-break', '.list-item-separator', '.section-header-wrapper'] } };
+            const opt = { 
+                margin: [10, 10, 30, 10], 
+                filename: `Laudo_Auditoria_${document.getElementById('input-rel').value || 'S_N'}.pdf`, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    letterRendering: true, 
+                    scrollY: 0,
+                    logging: false 
+                }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, 
+                pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid-break', '.list-item-separator', '.section-header-wrapper'] } 
+            };
+
             showToast("GERANDO PDF...");
-            try { await html2pdf().set(opt).from(clone).save(); showToast("SUCESSO!"); } catch (error) { showToast("ERRO!"); }
+            try { 
+                await html2pdf().set(opt).from(clone).save(); 
+                showToast("SUCESSO!"); 
+            } catch (error) { 
+                showToast("ERRO!"); 
+                console.error(error);
+            }
         }
 
         window.onload = () => { 
