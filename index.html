@@ -513,11 +513,17 @@
                     <span class="section-header"><i data-lucide="info" class="w-3 h-3 inline"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO</span>
                 </div>
                 <div class="mb-2">
-                    <div class="no-print editor-tools">
+                    <!-- Ferramentas de Edição -->
+                    <div class="no-print editor-tools items-center">
                         <button onmousedown="event.preventDefault(); formatDoc('bold')" class="tool-btn" title="Negrito">B</button>
-                        <div class="color-picker-wrapper tool-btn" title="Cor da Fonte">
-                            <i data-lucide="palette" class="w-3 h-3"></i>
-                            <input type="color" class="color-picker-input" onchange="formatDoc('foreColor', this.value)">
+                        <div class="flex items-center border-l border-gray-300 ml-1 pl-1 gap-1">
+                            <div class="color-picker-wrapper tool-btn" title="Escolher Cor">
+                                <i data-lucide="palette" class="w-3 h-3"></i>
+                                <input type="color" class="color-picker-input">
+                            </div>
+                            <button onmousedown="event.preventDefault(); let val = this.previousElementSibling.querySelector('input').value; formatDoc('foreColor', val)" class="tool-btn text-[9px] font-black text-green-700 w-auto px-1.5" title="Confirmar Cor">
+                                OK
+                            </button>
                         </div>
                     </div>
                     <div id="input-preliminar" contenteditable="true" class="rich-editor" placeholder="Cenário inicial, observações e contexto da auditoria..." oninput="savePreliminarContent(this.innerHTML)"></div>
@@ -600,6 +606,7 @@
         let opinions = []; 
         let extraBreaks = { afterMatrix: [], afterContext: [] };
 
+        // Função de formatação robusta que mantém a seleção
         function formatDoc(cmd, value = null) {
             document.execCommand(cmd, false, value);
         }
@@ -740,13 +747,19 @@
             lucide.createIcons();
         }
 
+        // Helper para gerar o HTML do toolbar rico com botão OK de confirmação
         function getRichToolbarHTML() {
             return `
-                <div class="no-print editor-tools">
+                <div class="no-print editor-tools items-center">
                     <button onmousedown="event.preventDefault(); formatDoc('bold')" class="tool-btn" title="Negrito">B</button>
-                    <div class="color-picker-wrapper tool-btn" title="Cor da Fonte">
-                        <i data-lucide="palette" class="w-3 h-3"></i>
-                        <input type="color" class="color-picker-input" onchange="formatDoc('foreColor', this.value)">
+                    <div class="flex items-center border-l border-gray-300 ml-1 pl-1 gap-1">
+                        <div class="color-picker-wrapper tool-btn" title="Escolher Cor">
+                            <i data-lucide="palette" class="w-3 h-3"></i>
+                            <input type="color" class="color-picker-input">
+                        </div>
+                        <button onmousedown="event.preventDefault(); let val = this.previousElementSibling.querySelector('input').value; formatDoc('foreColor', val)" class="tool-btn text-[9px] font-black text-green-700 w-auto px-1.5" title="Confirmar Cor">
+                            OK
+                        </button>
                     </div>
                 </div>
             `;
