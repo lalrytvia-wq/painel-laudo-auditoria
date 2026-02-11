@@ -331,7 +331,7 @@
             margin-top: 8px;
         }
 
-        /* BARRA DE FORMATAÇÃO (EDITADA) */
+        /* BARRA DE FORMATAÇÃO */
         .editor-tools {
             display: flex;
             gap: 2px;
@@ -417,6 +417,13 @@
             
             .printable-area { border: none !important; }
             .rich-editor { border: none !important; padding: 0 !important; }
+
+            /* Garante que o fundo do rodapé saia na cor certa no PDF */
+            footer {
+                background-color: #7f1d1d !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
@@ -570,8 +577,9 @@
                 </div>
             </section>
 
-            <footer class="p-4 text-center border-t border-gray-100 mt-10">
-                <p class="text-[7px] text-gray-300 font-black uppercase tracking-[0.4em]">Laudo Gerado Via Sistema Integrado de Auditoria e Riscos</p>
+            <!-- RODAPÉ ATUALIZADO: BARRA VERMELHA COM TEXTO BRANCO -->
+            <footer class="p-3 text-center mt-10 bg-[#7f1d1d]">
+                <p class="text-[7px] text-white font-black uppercase tracking-[0.4em]">Laudo Gerado Via Sistema Integrado de Auditoria e Riscos</p>
             </footer>
         </div>
     </div>
@@ -885,9 +893,7 @@
             
             // 2. Limpar agressivamente os estilos de quebras e espaçadores no clone
             clone.querySelectorAll('.manual-break').forEach(el => {
-                // Remove a classe para garantir que o CSS não a encontre
                 el.className = ''; 
-                // Define estilos de quebra limpos e invisíveis
                 el.style.cssText = "border: 0 !important; border-top: 0 !important; margin: 0 !important; padding: 0 !important; height: 0 !important; background: none !important; page-break-after: always !important; display: block !important; outline: none !important; box-shadow: none !important; visibility: hidden !important;";
                 el.innerHTML = ''; 
             });
