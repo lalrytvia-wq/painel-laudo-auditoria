@@ -96,14 +96,14 @@
             margin-bottom: 8px;
         }
 
-        .dynamic-textarea, input[type="text"] {
+        .dynamic-textarea, .rich-editor, input[type="text"] {
             background: transparent;
             width: 100%;
             outline: none;
             font-weight: 700;
         }
         
-        .dynamic-textarea {
+        .dynamic-textarea, .rich-editor {
             resize: none;
             overflow: hidden; 
             display: block;
@@ -111,6 +111,27 @@
             white-space: pre-wrap;
             line-height: 1.4;
             min-height: 1.4em;
+        }
+
+        .rich-editor {
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            background-color: #fff;
+            font-weight: 500;
+            font-size: 10px;
+        }
+
+        .rich-editor:focus {
+            border-color: #7f1d1d;
+            background-color: #fff;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .rich-editor[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: #94a3b8;
+            cursor: text;
         }
 
         .pdf-static-text {
@@ -310,11 +331,65 @@
             margin-top: 8px;
         }
 
+        /* BARRA DE FORMATAÇÃO (EDITADA) */
+        .editor-tools {
+            display: flex;
+            gap: 2px;
+            background: #f1f5f9;
+            padding: 4px;
+            border: 1px solid #cbd5e1;
+            width: fit-content;
+            margin-bottom: 2px;
+        }
+
+        .tool-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            border: 1px solid transparent;
+            background: white;
+            color: #475569;
+            transition: all 0.1s;
+        }
+
+        .tool-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+            color: #000;
+        }
+
+        .tool-btn:active {
+            background-color: #cbd5e1;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .color-picker-input {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            left: -50%;
+            top: -50%;
+            cursor: pointer;
+            opacity: 0;
+        }
+
         @media print {
             @page { margin: 0; size: A4 portrait; }
             body { background: white !important; padding: 0 !important; }
             .printable-area { margin: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; }
-            .no-print, .layout-toolbar, .add-layout-btn, .delete-item-btn { display: none !important; }
+            .no-print, .layout-toolbar, .add-layout-btn, .delete-item-btn, .editor-tools { display: none !important; }
             .pdf-page-break { display: block; page-break-after: always; height: 0; }
             .content-padding { padding: 10mm !important; }
             
@@ -331,6 +406,7 @@
             .manual-spacer::before { display: none; }
             
             .printable-area { border: none !important; }
+            .rich-editor { border: none !important; padding: 0 !important; }
         }
     </style>
 </head>
@@ -354,9 +430,7 @@
                     </div>
                 </div>
                 <div class="text-right flex flex-col items-end">
-                    <!-- Sequência Automática -->
                     <div id="display-fr-ref" class="bg-red-950 px-2 py-0.5 text-[8px] font-black border border-black uppercase inline-block leading-none">FR-AUD-289</div>
-                    <!-- Data Automática -->
                     <p id="display-date-ref" class="text-[7px] font-bold uppercase mt-1 leading-none">Ref: --/--/----</p>
                     <button onclick="clearData()" class="no-print mt-1.5 text-[8px] font-black bg-white text-[#7f1d1d] px-1.5 py-0.5 uppercase hover:bg-red-50 flex items-center gap-1 shadow-sm border border-[#7f1d1d]">
                         <i data-lucide="eraser" class="w-2.5 h-2.5"></i> Limpar Tudo
@@ -428,8 +502,16 @@
                 <div class="section-header-wrapper flex items-center gap-2">
                     <span class="section-header"><i data-lucide="info" class="w-3 h-3 inline"></i> 2. DESCRIÇÃO PRELIMINAR E CONTEXTO</span>
                 </div>
-                <div class="border border-black p-2 bg-white mb-2">
-                    <textarea class="dynamic-textarea" id="input-preliminar" rows="4" placeholder="Cenário inicial, observações e contexto da auditoria..."></textarea>
+                <div class="mb-2">
+                    <!-- Ferramentas de Edição -->
+                    <div class="no-print editor-tools">
+                        <button onmousedown="event.preventDefault(); formatDoc('bold')" class="tool-btn" title="Negrito">B</button>
+                        <div class="color-picker-wrapper tool-btn" title="Cor da Fonte">
+                            <i data-lucide="palette" class="w-3 h-3"></i>
+                            <input type="color" class="color-picker-input" onchange="formatDoc('foreColor', this.value)">
+                        </div>
+                    </div>
+                    <div id="input-preliminar" contenteditable="true" class="rich-editor" placeholder="Cenário inicial, observações e contexto da auditoria..." oninput="savePreliminarContent(this.innerHTML)"></div>
                 </div>
                 
                 <div id="preliminar-images" class="flex flex-wrap gap-2 mb-2"></div>
@@ -499,16 +581,25 @@
 
         let isLayoutMode = false;
         let selectedRiskCoord = { r: -1, c: -1 }; 
-        let currentSequence = 289; // Início solicitado pelo usuário
+        let currentSequence = 289; 
 
         const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
 
         let preliminarImages = [];
+        let preliminarContent = "";
         let findings = []; 
         let opinions = []; 
         let extraBreaks = { afterMatrix: [], afterContext: [] };
 
-        // Função para atualizar data e referência automática
+        // Função de formatação robusta que mantém a seleção
+        function formatDoc(cmd, value = null) {
+            document.execCommand(cmd, false, value);
+        }
+
+        function savePreliminarContent(content) {
+            preliminarContent = content;
+        }
+
         function updateAutoRefs() {
             const today = new Date();
             const dateStr = today.toLocaleDateString('pt-BR');
@@ -615,17 +706,13 @@
 
         function clearData() {
             if(!confirm('Deseja iniciar um novo laudo? (A sequência será incrementada)')) return;
-            
-            // Incrementar sequência ao limpar (entende-se como início de novo laudo)
             currentSequence++;
-            
-            findings = []; opinions = []; extraBreaks = { afterMatrix: [], afterContext: [] }; preliminarImages = []; selectedRiskCoord = { r: -1, c: -1 };
+            findings = []; opinions = []; extraBreaks = { afterMatrix: [], afterContext: [] }; preliminarImages = []; selectedRiskCoord = { r: -1, c: -1 }; preliminarContent = "";
             document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
             document.querySelectorAll('textarea').forEach(i => i.value = '');
+            document.getElementById('input-preliminar').innerHTML = '';
             document.getElementById('risk-result').innerHTML = '<p class="text-[9px] font-bold text-slate-400 mb-0.5 uppercase italic">Selecione um quadrante na matriz acima</p>';
-            
-            updateAutoRefs(); // Atualiza data e número
-            renderMatrix(); renderPrelimImages(); renderFindings(); renderOpinions(); renderExtraBreaks();
+            updateAutoRefs(); renderMatrix(); renderPrelimImages(); renderFindings(); renderOpinions(); renderExtraBreaks();
             showToast("NOVO LAUDO INICIADO!");
         }
 
@@ -675,7 +762,6 @@
             else if (target === 'opinions') list = opinions;
             else if (target === 'extra1') list = extraBreaks.afterMatrix;
             else if (target === 'extra2') list = extraBreaks.afterContext;
-            
             if (list) {
                 const item = list.find(i => i.id === id);
                 if (item) item.height = height;
@@ -695,8 +781,8 @@
         function removeLayoutItem(target, id) {
             if (target === 'findings') findings = findings.filter(i => i.id !== id);
             else if (target === 'opinions') opinions = opinions.filter(i => i.id !== id);
-            else if (target === 'extra1') extraBreaks.afterMatrix = extraBreaks.afterMatrix.filter(i => i.id !== id);
-            else if (target === 'extra2') extraBreaks.afterContext = extraBreaks.afterContext.filter(i => i.id !== id);
+            else if (target === 'extra1') extraBreaks.afterMatrix.splice(index, 1);
+            else if (target === 'extra2') extraBreaks.afterContext.splice(index, 1);
             renderExtraBreaks(); renderFindings(); renderOpinions();
         }
 
@@ -730,6 +816,19 @@
             lucide.createIcons(); addDragEvents();
         }
 
+        // Helper para gerar o HTML do toolbar rico
+        function getRichToolbarHTML() {
+            return `
+                <div class="no-print editor-tools">
+                    <button onmousedown="event.preventDefault(); formatDoc('bold')" class="tool-btn" title="Negrito">B</button>
+                    <div class="color-picker-wrapper tool-btn" title="Cor da Fonte">
+                        <i data-lucide="palette" class="w-3 h-3"></i>
+                        <input type="color" class="color-picker-input" onchange="formatDoc('foreColor', this.value)">
+                    </div>
+                </div>
+            `;
+        }
+
         function renderFindings() {
             const container = document.getElementById('findings-list'); let html = '';
             findings.forEach((f, i) => {
@@ -745,13 +844,16 @@
                             </div>
                             <div class="p-3 flex flex-col gap-3">
                                 <input type="text" class="border border-black p-1 bg-slate-50 font-bold text-[9px] uppercase" value="${f.proc}" placeholder="OBJETO DO EXAME..." onchange="findings[${i}].proc = this.value">
+                                
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="paperclip" class="w-2.5 h-2.5"></i> Evidências</h4>
+                                    
                                     ${f.evid.map((e, ei) => `
                                         <div class="list-item-separator">
+                                            ${getRichToolbarHTML()}
                                             <div class="flex gap-2 items-start">
                                                 <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ei+1}]</span>
-                                                <textarea class="dynamic-textarea flex-1" onchange="findings[${i}].evid[${ei}].text = this.value" placeholder="Fato...">${e.text}</textarea>
+                                                <div contenteditable="true" class="rich-editor flex-1" placeholder="Descreva o fato..." oninput="findings[${i}].evid[${ei}].text = this.innerHTML">${e.text}</div>
                                                 <button onclick="findings[${i}].evid.splice(${ei}, 1); renderFindings()" class="no-print text-red-300"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                                             </div>
                                             <div class="item-anexo-gallery">${e.imgs.map((img, imi) => `<div class="resizable-wrapper" style="width: 80px; height: 80px;"><img src="${img}"><button onclick="findings[${i}].evid[${ei}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5"><i data-lucide="trash-2" class="w-2 h-2"></i></button></div>`).join('')}</div>
@@ -759,13 +861,16 @@
                                         </div>`).join('')}
                                     <button onclick="findings[${i}].evid.push({text: '', imgs: []}); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase mt-1">+ Fato</button>
                                 </div>
+
                                 <div class="border border-black p-2 bg-white">
                                     <h4 class="text-[8px] font-black text-red-900 uppercase mb-1.5 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Conformidades</h4>
+                                    
                                     ${f.nc.map((n, ni) => `
                                         <div class="list-item-separator">
+                                            ${getRichToolbarHTML()}
                                             <div class="flex gap-2 items-start">
                                                 <span class="text-[9px] font-bold mt-0.5 text-red-800">[${ni+1}]</span>
-                                                <textarea class="dynamic-textarea flex-1" onchange="findings[${i}].nc[${ni}].text = this.value" placeholder="Desvio...">${n.text}</textarea>
+                                                <div contenteditable="true" class="rich-editor flex-1" placeholder="Descreva o desvio..." oninput="findings[${i}].nc[${ni}].text = this.innerHTML">${n.text}</div>
                                                 <button onclick="findings[${i}].nc.splice(${ni}, 1); renderFindings()" class="no-print text-red-300"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                                             </div>
                                             <div class="item-anexo-gallery">${n.imgs.map((img, imi) => `<div class="resizable-wrapper" style="width: 80px; height: 80px;"><img src="${img}"><button onclick="findings[${i}].nc[${ni}].imgs.splice(${imi}, 1); renderFindings()" class="no-print absolute top-0 right-0 bg-red-700 text-white p-0.5"><i data-lucide="trash-2" class="w-2 h-2"></i></button></div>`).join('')}</div>
@@ -773,6 +878,7 @@
                                         </div>`).join('')}
                                     <button onclick="findings[${i}].nc.push({text: '', imgs: []}); renderFindings()" class="no-print text-[7px] font-black text-red-700 uppercase mt-1">+ Desvio</button>
                                 </div>
+
                                 <div class="grid grid-cols-2 gap-2 border-t border-black pt-2">
                                     <input type="text" value="${f.acao}" onchange="findings[${i}].acao = this.value" placeholder="PLANO AÇÃO" class="border border-black p-1 text-[8px] bg-green-50/20">
                                     <input type="text" value="${f.resp}" onchange="findings[${i}].resp = this.value" placeholder="RESPONSÁVEL" class="border border-black p-1 text-[8px] bg-green-50/20">
@@ -842,16 +948,29 @@
             if (isLayoutMode) toggleLayoutMode();
             const originalElement = document.getElementById('printable-dashboard'); const clone = originalElement.cloneNode(true);
             clone.querySelectorAll('.no-print').forEach(el => el.remove());
+            
+            // Tratar áreas de texto estático no PDF
             clone.querySelectorAll('textarea').forEach((ta, idx) => { const originalTa = originalElement.querySelectorAll('textarea')[idx]; const div = document.createElement('div'); div.className = 'pdf-static-text'; div.textContent = originalTa.value; ta.parentNode.replaceChild(div, ta); });
+            
+            // Tratar Rich Text Editors (contenteditable) - Mantém HTML para negrito e cor
+            clone.querySelectorAll('.rich-editor').forEach((re, idx) => {
+                const originalRe = originalElement.querySelectorAll('.rich-editor')[idx];
+                const div = document.createElement('div');
+                div.className = 'pdf-static-text';
+                div.innerHTML = originalRe.innerHTML || "";
+                re.parentNode.replaceChild(div, re);
+            });
+
             clone.querySelectorAll('input[type="text"]').forEach((inp, idx) => { const originalInp = originalElement.querySelectorAll('input[type="text"]')[idx]; const span = document.createElement('span'); span.className = 'pdf-static-text'; span.textContent = originalInp.value; inp.parentNode.replaceChild(span, inp); });
             clone.querySelectorAll('select').forEach((sel, idx) => { const originalSel = originalElement.querySelectorAll('select')[idx]; const span = document.createElement('span'); span.className = 'pdf-static-text text-center block w-full uppercase'; span.textContent = originalSel.value; sel.parentNode.replaceChild(span, sel); });
+            
             const opt = { margin: [10, 10, 30, 10], filename: `Laudo_Auditoria_${document.getElementById('input-rel').value || 'S_N'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['.avoid-break', '.list-item-separator', '.section-header-wrapper'] } };
             showToast("GERANDO PDF...");
             try { await html2pdf().set(opt).from(clone).save(); showToast("SUCESSO!"); } catch (error) { showToast("ERRO!"); }
         }
 
         window.onload = () => { 
-            updateAutoRefs(); // Inicia com data e seq 289
+            updateAutoRefs(); 
             renderMatrix(); 
             renderExtraBreaks(); 
             renderPrelimImages(); 
